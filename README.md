@@ -1,4 +1,5 @@
 ﻿# GoProjectify
+ ![][https://github.com/ebkr/GoProjectify/blob/master/Assets/goProjectify.png]
  
 ## What is it?
 GoProjectify is a Software Management Software, aiming to provide an easy way to create tasks and dependencies.
