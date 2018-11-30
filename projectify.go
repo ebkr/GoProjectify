@@ -67,5 +67,8 @@ func loadCase(load string) {
 	loadedProject = projectify.StructProject{}
 	fileProject := projectify.StructCreate{}.New(load + ".projectify")
 	nodes := fileProject.GenerateNodeTree()
-	fmt.Println(nodes)
+	for i := 0; i < len(nodes); i++ {
+		fmt.Println("::")
+		nodes[i].Print(1)
+	}
 }

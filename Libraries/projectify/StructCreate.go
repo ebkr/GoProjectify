@@ -72,6 +72,13 @@ func (ref StructCreate) GenerateNodeTree() []*StructNode {
 					tempNode := StructNode{}.New(id, value)
 					templateNodes = append(templateNodes, &tempNode)
 				}
+			} else if action == "<<BINDS>>" {
+				splitTwice := strings.Split(split[i], ":")
+				id, err := strconv.Atoi(splitTwice[0])
+				id2, err2 := strconv.Atoi(splitTwice[1])
+				if err == nil && err2 == nil {
+					templateNodes[id].AddConnection(templateNodes[id2])
+				}
 			}
 		}
 	}
