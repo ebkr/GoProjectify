@@ -7,6 +7,8 @@ import (
 	"./Libraries/projectify"
 )
 
+var loadedProject projectify.StructProject
+
 func main() {
 	// Display selections
 	fmt.Println("Selection an option: ")
@@ -19,13 +21,15 @@ func main() {
 	fmt.Scanln(&name)
 	var num, err = strconv.Atoi(name)
 	if err == nil {
-		appController(num)
+		if appController(num) == true {
+			main()
+		}
 	} else {
 		main()
 	}
 }
 
-func appController(area int) {
+func appController(area int) bool {
 	fmt.Println("----------")
 	switch area {
 	case 1:
@@ -38,7 +42,10 @@ func appController(area int) {
 		break
 	case 2:
 		// Load project #TODO
-		fmt.Println("Load Project")
+		fmt.Println("Enter project name: ")
+		scan := ""
+		fmt.Scanln(&scan)
+		loadCase(scan)
 		break
 	case 3:
 		// Delete project #TODO
@@ -47,6 +54,18 @@ func appController(area int) {
 	case 4:
 		// Exits the program
 		fmt.Println("Exit")
-		break
+		fmt.Println("----------")
+		fmt.Println("APPLICATION EXIT")
+		fmt.Println("----------")
+		return false
 	}
+	fmt.Println("----------")
+	return true
+}
+
+func loadCase(load string) {
+	loadedProject = projectify.StructProject{}
+	fileProject := projectify.StructCreate{}.New(load + ".projectify")
+	nodes := fileProject.GenerateNodeTree()
+	fmt.Println(nodes)
 }
