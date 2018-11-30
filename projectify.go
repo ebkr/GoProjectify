@@ -11,7 +11,7 @@ var loadedProject projectify.StructProject
 
 func main() {
 	// Display selections
-	fmt.Println("Selection an option: ")
+	fmt.Println("Select an option: ")
 	fmt.Println("1. New Project")
 	fmt.Println("2. Load Project")
 	fmt.Println("3. Delete Project")

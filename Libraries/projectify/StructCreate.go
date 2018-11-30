@@ -2,7 +2,6 @@ package projectify
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -52,7 +51,6 @@ func (ref StructCreate) AppendFile(data string) bool {
 
 func (ref StructCreate) GenerateNodeTree() []*StructNode {
 	ref.updateReadData()
-	fmt.Println(ref.data)
 	split := strings.Split(ref.data, "\n")
 
 	var action string = "#"
