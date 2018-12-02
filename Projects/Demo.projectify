@@ -1,5 +1,8 @@
 # An empty GoProjectify project
-# Current generated document
-<<TEMPLATEs>>
+<<TEMPLATES>>
+3:Test4
+2:Test3
+1:Test2
+0:Test
 <<BINDS>>
 <<POSITIONS>>

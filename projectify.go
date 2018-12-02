@@ -9,6 +9,12 @@ import (
 
 var loadedProject projectify.StructProject
 
+func readInput() string {
+	var inp string
+	fmt.Scanln(&inp)
+	return inp
+}
+
 func main() {
 	// Display selections
 	fmt.Println("Select an option: ")
@@ -17,9 +23,7 @@ func main() {
 	fmt.Println("3. Delete Project")
 	fmt.Println("4. Exit")
 	// Allow option selection
-	var name string = ""
-	fmt.Scanln(&name)
-	var num, err = strconv.Atoi(name)
+	var num, err = strconv.Atoi(readInput())
 	if err == nil {
 		if appController(num) == true {
 			main()
@@ -35,17 +39,13 @@ func appController(area int) bool {
 	case 1:
 		// Create a new projectify project under /Projects
 		fmt.Println("Enter a project name (No Spaces): ")
-		scan := ""
-		fmt.Scanln(&scan)
-		create := projectify.StructCreate{}.New(scan + ".projectify")
-		create.OverwriteFile("# An empty GoProjectify project\n<<TEMPLATEs>>\n<<BINDS>>\n<<POSITIONS>>")
+		create := projectify.StructCreate{}.New(readInput() + ".projectify")
+		create.OverwriteFile("# An empty GoProjectify project\n<<TEMPLATES>>\n<<BINDS>>\n<<POSITIONS>>")
 		break
 	case 2:
 		// Load project #TODO
 		fmt.Println("Enter project name: ")
-		scan := ""
-		fmt.Scanln(&scan)
-		loadCase(scan)
+		loadCase(readInput())
 		break
 	case 3:
 		// Delete project #TODO
@@ -55,6 +55,7 @@ func appController(area int) bool {
 		// Exits the program
 		fmt.Println("Exit")
 		fmt.Println("----------")
+		fmt.Println("----------")
 		fmt.Println("APPLICATION EXIT")
 		fmt.Println("----------")
 		return false
@@ -63,12 +64,45 @@ func appController(area int) bool {
 	return true
 }
 
+func generateProjectTree(fileProject *projectify.StructCreate, proj *projectify.StructProject) {
+	proj.Init()
+	nodes := fileProject.GenerateNodeTree()
+	myMap := map[*projectify.StructNode]string{}
+	for i := 0; i < len(nodes); i++ {
+		myMap[nodes[i]] = nodes[i].GetValue()
+	}
+	proj.SetTree(myMap)
+}
+
 func loadCase(load string) {
 	loadedProject = projectify.StructProject{}
 	fileProject := projectify.StructCreate{}.New(load + ".projectify")
-	nodes := fileProject.GenerateNodeTree()
-	for i := 0; i < len(nodes); i++ {
-		fmt.Println("::")
-		nodes[i].Print(1)
+	proj := projectify.StructProject{}
+	generateProjectTree(&fileProject, &proj)
+	var exit bool
+	for !exit {
+		fmt.Println("--------->")
+		fmt.Println("\\ Select an option: ")
+		fmt.Println("1. Add new node")
+		fmt.Println("2. Remove a node")
+		var num, err = strconv.Atoi(readInput())
+		if err == nil {
+			switch num {
+			case 1:
+				fmt.Println("-------->>")
+				fmt.Println("Name new node: ")
+				name := readInput()
+				generateProjectTree(&fileProject, &proj)
+				fileProject.AppendFile("<<TEMPLATES>>", strconv.Itoa(proj.GetAvailableId())+":"+name)
+				break
+			case 2:
+				generateProjectTree(&fileProject, &proj)
+				fmt.Println("Name of node: ")
+				node := proj.GetNodeByName(readInput())
+				if node != nil {
+					fileProject.RemoveLine(strconv.Itoa(node.GetId()) + ":" + node.GetValue())
+				}
+			}
+		}
 	}
 }

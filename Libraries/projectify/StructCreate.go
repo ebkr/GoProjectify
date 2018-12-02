@@ -26,6 +26,7 @@ func (ref StructCreate) OverwriteFile(data string) bool {
 	if err != nil {
 		return false
 	} else {
+		file.Truncate(0)
 		file.WriteString(data)
 		file.Close()
 	}
@@ -33,7 +34,7 @@ func (ref StructCreate) OverwriteFile(data string) bool {
 }
 
 // Used to append a string to the file.
-func (ref StructCreate) AppendFile(data string) bool {
+func (ref StructCreate) AppendFile(after, newLine string) bool {
 	file, err := os.OpenFile(ref.Dir+ref.Name, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return false
@@ -42,18 +43,39 @@ func (ref StructCreate) AppendFile(data string) bool {
 		text := ""
 		for scanner.Scan() {
 			text += scanner.Text() + "\n"
+			if scanner.Text() == after {
+				text += newLine + "\n"
+			}
 		}
-		text += data
 		file.Close()
 		return ref.OverwriteFile(text)
 	}
+}
+
+// Used to remove a line from the text document
+func (ref *StructCreate) RemoveLine(search string) bool {
+	ref.updateReadData()
+	split := strings.Split(ref.data, "\n")
+	ref.data = ""
+	var removed bool
+	for i := 0; i < len(split); i++ {
+		if split[i] != search && split[i] != "" {
+			ref.data += split[i] + "\n"
+		} else {
+			removed = true
+		}
+	}
+	if removed {
+		ref.OverwriteFile(ref.data)
+	}
+	return removed
 }
 
 func (ref StructCreate) GenerateNodeTree() []*StructNode {
 	ref.updateReadData()
 	split := strings.Split(ref.data, "\n")
 
-	var action string = "#"
+	var action = "#"
 	templateNodes := []*StructNode{}
 
 	for i := 0; i < len(split); i++ {

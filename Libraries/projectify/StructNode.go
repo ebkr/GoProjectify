@@ -57,3 +57,11 @@ func (ref StructNode) Print(i int) {
 		ref.Connections[i].Print(i + 1)
 	}
 }
+
+func (ref StructNode) GetId() int {
+	return ref.id
+}
+
+func (ref StructNode) GetValue() string {
+	return ref.value
+}
