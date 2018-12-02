@@ -85,6 +85,7 @@ func loadCase(load string) {
 		fmt.Println("\\ Select an option: ")
 		fmt.Println("1. Add new node")
 		fmt.Println("2. Remove a node")
+		fmt.Println("3. Return")
 		var num, err = strconv.Atoi(readInput())
 		if err == nil {
 			switch num {
@@ -102,6 +103,10 @@ func loadCase(load string) {
 				if node != nil {
 					fileProject.RemoveLine(strconv.Itoa(node.GetId()) + ":" + node.GetValue())
 				}
+				break
+			case 3:
+				exit = true
+				break
 			}
 		}
 	}
