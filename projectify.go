@@ -93,7 +93,7 @@ func loadCase(load string) {
 	var exit bool
 	for !exit {
 		// Opts contains menu options to display
-		opts := []string{"Add new node", "Remove a node", "Link nodes", "Print", "Return"}
+		opts := []string{"Add new node", "Remove a node", "Link nodes", "Print", "Display all nodes", "Return"}
 		// Funcs contains functions, with an index corresponding to their menu counterparts
 		funcs := []func(){
 			// New node
@@ -142,6 +142,13 @@ func loadCase(load string) {
 				nodeA := proj.GetNodeByName(readInput())
 				if nodeA != nil {
 					nodeA.Print(1)
+				}
+			},
+			func() {
+				fmt.Println("-------->>")
+				fmt.Println("Nodes: ")
+				for k := range proj.GetTree() {
+					fmt.Println(strconv.Itoa(k.GetId()) + ":" + k.GetValue())
 				}
 			},
 			// Back to main menu
