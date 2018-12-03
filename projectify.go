@@ -9,7 +9,9 @@ import (
 
 var loadedProject projectify.StructProject
 
+// Handle user input
 func readInput() string {
+	fmt.Print("> ")
 	var inp string
 	fmt.Scanln(&inp)
 	return inp
@@ -64,6 +66,8 @@ func appController(area int) bool {
 	return true
 }
 
+// Generate Project Tree
+// Refreshes StructProject, and provide updated node list.
 func generateProjectTree(fileProject *projectify.StructCreate, proj *projectify.StructProject) {
 	proj.Init()
 	nodes := fileProject.GenerateNodeTree()
@@ -74,6 +78,8 @@ func generateProjectTree(fileProject *projectify.StructCreate, proj *projectify.
 	proj.SetTree(myMap)
 }
 
+// Run when user is loading a project.
+// Provides options for loaded project
 func loadCase(load string) {
 	loadedProject = projectify.StructProject{}
 	fileProject := projectify.StructCreate{}.New(load + ".projectify")
@@ -81,32 +87,72 @@ func loadCase(load string) {
 	generateProjectTree(&fileProject, &proj)
 	var exit bool
 	for !exit {
-		fmt.Println("--------->")
-		fmt.Println("\\ Select an option: ")
-		fmt.Println("1. Add new node")
-		fmt.Println("2. Remove a node")
-		fmt.Println("3. Return")
-		var num, err = strconv.Atoi(readInput())
-		if err == nil {
-			switch num {
-			case 1:
+		// Opts contains menu options to display
+		opts := []string{"Add new node", "Remove a node", "Link nodes", "Print", "Return"}
+		// Funcs contains functions, with an index corresponding to their menu counterparts
+		funcs := []func(){
+			// New node
+			func() {
 				fmt.Println("-------->>")
 				fmt.Println("Name new node: ")
 				name := readInput()
 				generateProjectTree(&fileProject, &proj)
-				fileProject.AppendFile("<<TEMPLATES>>", strconv.Itoa(proj.GetAvailableId())+":"+name)
-				break
-			case 2:
+				fileProject.AppendFile("<<TEMPLATES>>", strconv.Itoa(proj.GetAvailableID())+":"+name)
+			},
+			// Remove node
+			func() {
+				fmt.Println("-------->>")
 				generateProjectTree(&fileProject, &proj)
 				fmt.Println("Name of node: ")
 				node := proj.GetNodeByName(readInput())
 				if node != nil {
 					fileProject.RemoveLine(strconv.Itoa(node.GetId()) + ":" + node.GetValue())
 				}
-				break
-			case 3:
+			},
+			// Link nodes
+			func() {
+				fmt.Println("-------->>")
+				fmt.Println("Start Node: ")
+				nodeA := proj.GetNodeByName(readInput())
+				fmt.Println("End Node: ")
+				nodeB := proj.GetNodeByName(readInput())
+				if nodeA != nil && nodeB != nil {
+					fmt.Println("...........")
+					if nodeA.AddConnection(nodeB) {
+						fmt.Println("Connected " + nodeA.GetValue() + " to " + nodeB.GetValue())
+						fileProject.RemoveLine(strconv.Itoa(nodeA.GetId()) + ":" + strconv.Itoa(nodeB.GetId()))
+						fileProject.AppendFile("<<BINDS>>", strconv.Itoa(nodeA.GetId())+":"+strconv.Itoa(nodeB.GetId()))
+					} else {
+						fmt.Println("Two nodes are already connected")
+						fmt.Println("Recursion is not allowed")
+					}
+					fmt.Println("...........")
+				}
+				generateProjectTree(&fileProject, &proj)
+			},
+			// Display nodes
+			func() {
+				fmt.Println("-------->>")
+				fmt.Println("Print Node: ")
+				nodeA := proj.GetNodeByName(readInput())
+				if nodeA != nil {
+					nodeA.Print(1)
+				}
+			},
+			// Back to main menu
+			func() {
 				exit = true
-				break
+			},
+		}
+		// Display options, and handle selection
+		fmt.Println("--------->")
+		for i := 0; i < len(opts); i++ {
+			fmt.Println(strconv.Itoa(i+1) + ". " + opts[i])
+		}
+		var num, err = strconv.Atoi(readInput())
+		if err == nil {
+			if num > 0 && num <= len(opts) {
+				funcs[num-1]()
 			}
 		}
 	}

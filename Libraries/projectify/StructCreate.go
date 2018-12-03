@@ -7,20 +7,20 @@ import (
 	"strings"
 )
 
-// Base data
+// StructCreate : Struct containing FileName, FileDirectory, and Data (string of file text)
 type StructCreate struct {
 	Name string
 	Dir  string
 	data string
 }
 
-// Used to generate a working Struct
+// New : Used to generate a working Struct
 func (ref StructCreate) New(Name string) StructCreate {
 	c := StructCreate{Name, "./Projects/", ""}
 	return c
 }
 
-// Used to override file contents with specified string.
+// OverwriteFile : Used to override file contents with specified string.
 func (ref StructCreate) OverwriteFile(data string) bool {
 	file, err := os.OpenFile(ref.Dir+ref.Name, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
@@ -33,7 +33,7 @@ func (ref StructCreate) OverwriteFile(data string) bool {
 	return true
 }
 
-// Used to append a string to the file.
+// AppendFile : Used to append a string to the file.
 func (ref StructCreate) AppendFile(after, newLine string) bool {
 	file, err := os.OpenFile(ref.Dir+ref.Name, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
@@ -52,7 +52,7 @@ func (ref StructCreate) AppendFile(after, newLine string) bool {
 	}
 }
 
-// Used to remove a line from the text document
+// RemoveLine : Used to remove a line from the text document
 func (ref *StructCreate) RemoveLine(search string) bool {
 	ref.updateReadData()
 	split := strings.Split(ref.data, "\n")
@@ -71,6 +71,7 @@ func (ref *StructCreate) RemoveLine(search string) bool {
 	return removed
 }
 
+// GenerateNodeTree : Creates an array of StructNodes, and links them together using the StructCreate Data
 func (ref StructCreate) GenerateNodeTree() []*StructNode {
 	ref.updateReadData()
 	split := strings.Split(ref.data, "\n")
@@ -97,7 +98,18 @@ func (ref StructCreate) GenerateNodeTree() []*StructNode {
 				id, err := strconv.Atoi(splitTwice[0])
 				id2, err2 := strconv.Atoi(splitTwice[1])
 				if err == nil && err2 == nil {
-					templateNodes[id].AddConnection(templateNodes[id2])
+					var nodeA *StructNode
+					var nodeB *StructNode
+					for search := 0; search < len(templateNodes); search++ {
+						if templateNodes[search].GetId() == id {
+							nodeA = templateNodes[search]
+						} else if templateNodes[search].GetId() == id2 {
+							nodeB = templateNodes[search]
+						}
+					}
+					if nodeA != nil && nodeB != nil {
+						nodeA.AddConnection(nodeB)
+					}
 				}
 			}
 		}
@@ -105,6 +117,7 @@ func (ref StructCreate) GenerateNodeTree() []*StructNode {
 	return templateNodes
 }
 
+// updateReadData : Read the corresponding file, and place in to data field.
 func (ref *StructCreate) updateReadData() {
 	file, err := os.OpenFile(ref.Dir+ref.Name, os.O_RDONLY|os.O_CREATE, 0666)
 	if err == nil {

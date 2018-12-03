@@ -12,19 +12,23 @@ import (
 	"sort"
 )
 
+// StructProject : Contains a list of all nodes associated with loaded project
 type StructProject struct {
 	templates map[*StructNode]string
 }
 
+// Init : Initialise empty map
 func (ref *StructProject) Init() {
 	ref.templates = make(map[*StructNode]string)
 }
 
+// SetTree : Overwrite templates map
 func (ref *StructProject) SetTree(nodes map[*StructNode]string) {
 	ref.templates = nodes
 }
 
-func (ref *StructProject) GetAvailableId() int {
+// GetAvailableID : Retrieve the lowest possible ID. Prevents ridiculous IDs.
+func (ref *StructProject) GetAvailableID() int {
 	id := -1
 	numeric := []int{}
 	for k := range ref.templates {
@@ -39,6 +43,7 @@ func (ref *StructProject) GetAvailableId() int {
 	return (id + 1)
 }
 
+// GetNodeByName : Return a StructNode via value search
 func (ref *StructProject) GetNodeByName(name string) *StructNode {
 	for k, v := range ref.templates {
 		if v == name {
@@ -48,6 +53,7 @@ func (ref *StructProject) GetNodeByName(name string) *StructNode {
 	return nil
 }
 
+// GetTree : Return the project's tree
 func (ref *StructProject) GetTree() map[*StructNode]string {
 	return ref.templates
 }

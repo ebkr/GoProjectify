@@ -5,45 +5,48 @@ import (
 	"strconv"
 )
 
+// StructNode contains a value, id, and a list of all connected nodes.
+// Nodes cannot be recursive.
 type StructNode struct {
 	Connections []*StructNode
 	value       string
 	id          int
 }
 
+// New : Create basic object
 func (ref StructNode) New(id int, value string) StructNode {
 	n := StructNode{[]*StructNode{}, value, id}
 	return n
 }
 
-/*
-*
- */
+// isConnected : Compares connected nodes, to prevent recursive connections
 func (ref *StructNode) isConnected(node *StructNode) bool {
 	if ref == node {
 		return true
 	} else {
 		found := false
-		// Check for node in ref.
-		for i := 0; i < len(ref.Connections); i++ {
-			if ref.Connections[i] == node {
-				found = found || ref.Connections[i].isConnected(node)
+		for _, v := range ref.Connections {
+			if v == node {
+				return true
+			} else {
+				found = found || v.isConnected(node)
 			}
 		}
-		// Check for ref in node.
-		for i := 0; i < len(node.Connections); i++ {
-			if node.Connections[i] == ref {
-				found = found || node.Connections[i].isConnected(ref)
+		for _, v := range node.Connections {
+			if v == ref {
+				return true
+			} else {
+				found = found || v.isConnected(ref)
 			}
 		}
 		return found
 	}
 }
 
+// AddConnection : Calls upon isConnected to determine if connection is valid. Will connect if valid.
 func (ref *StructNode) AddConnection(node *StructNode) bool {
-	self := *ref
 	if !ref.isConnected(node) {
-		arr := append(self.Connections, node)
+		arr := append(ref.Connections, node)
 		ref.Connections = arr
 		return true
 	} else {
@@ -51,6 +54,7 @@ func (ref *StructNode) AddConnection(node *StructNode) bool {
 	}
 }
 
+// Print : Displays connected nodes
 func (ref StructNode) Print(i int) {
 	fmt.Println(ref.value + ":" + strconv.Itoa(i))
 	for i := 0; i < len(ref.Connections); i++ {
@@ -58,10 +62,12 @@ func (ref StructNode) Print(i int) {
 	}
 }
 
+// GetId : Retrieve Node's ID
 func (ref StructNode) GetId() int {
 	return ref.id
 }
 
+// GetValue : Retrieve Node's value
 func (ref StructNode) GetValue() string {
 	return ref.value
 }
