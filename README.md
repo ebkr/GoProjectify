@@ -8,8 +8,10 @@ It can be used to break tasks down, or to create a chain of tasks to perform.
 
 ### Status
 
-Not usable at the current time.
+You can create and link nodes together.
 
-It can currently create a .projectify file, containing the required base information, with a certain name.
+There is no visual representation, other than a print command.
 
-The project will primarily be back-end work, however upon completion, a front-end will be developed, allowing ease of use, and a tree-node display.
+You are unable to delete links.
+
+You can remove nodes.
