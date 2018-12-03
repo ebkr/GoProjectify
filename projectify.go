@@ -45,13 +45,14 @@ func appController(area int) bool {
 		create.OverwriteFile("# An empty GoProjectify project\n<<TEMPLATES>>\n<<BINDS>>\n<<POSITIONS>>")
 		break
 	case 2:
-		// Load project #TODO
+		// Load project
 		fmt.Println("Enter project name: ")
 		loadCase(readInput())
 		break
 	case 3:
-		// Delete project #TODO
+		// Delete project
 		fmt.Println("Delete Project")
+		deleteCase(readInput())
 		break
 	case 4:
 		// Exits the program
@@ -81,8 +82,12 @@ func generateProjectTree(fileProject *projectify.StructCreate, proj *projectify.
 // Run when user is loading a project.
 // Provides options for loaded project
 func loadCase(load string) {
-	loadedProject = projectify.StructProject{}
 	fileProject := projectify.StructCreate{}.New(load + ".projectify")
+	if !fileProject.CheckExistence() {
+		fmt.Println("File Not Found")
+		return
+	}
+	loadedProject = projectify.StructProject{}
 	proj := projectify.StructProject{}
 	generateProjectTree(&fileProject, &proj)
 	var exit bool
@@ -155,5 +160,15 @@ func loadCase(load string) {
 				funcs[num-1]()
 			}
 		}
+	}
+}
+
+func deleteCase(load string) {
+	fileProject := projectify.StructCreate{}.New(load + ".projectify")
+	if fileProject.CheckExistence() {
+		fileProject.Delete()
+		fmt.Println("Deleted Project: " + load)
+	} else {
+		fmt.Println("Invalid Name")
 	}
 }

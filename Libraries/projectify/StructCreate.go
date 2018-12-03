@@ -129,3 +129,15 @@ func (ref *StructCreate) updateReadData() {
 		file.Close()
 	}
 }
+
+func (ref *StructCreate) Delete() {
+	os.Remove(ref.Dir + ref.Name)
+}
+
+func (ref *StructCreate) CheckExistence() bool {
+	_, err := os.Stat(ref.Dir + ref.Name)
+	if err != nil {
+		return !os.IsNotExist(err)
+	}
+	return true
+}
