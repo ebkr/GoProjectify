@@ -72,7 +72,7 @@ func (ref *StructCreate) RemoveLine(search string) bool {
 }
 
 // GenerateNodeTree : Creates an array of StructNodes, and links them together using the StructCreate Data
-func (ref StructCreate) GenerateNodeTree() []*StructNode {
+func (ref *StructCreate) GenerateNodeTree() []*StructNode {
 	ref.updateReadData()
 	split := strings.Split(ref.data, "\n")
 

@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+    <head>
+        <title>GoProjectify</title>
+        <link href="Code/CSS/Base.css" rel="stylesheet" type="text/css" />
+        <link href="Code/JS/Lib/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+        <script src="Code/JS/Lib/jquery3.3.1.js"></script>
+        <script src="Code/JS/Lib/jquery-ui.min.js"></script>
+        <script src="Code/JS/Lib/jquery-connections.js"></script>
+    </head>
+    <body>
+        <nav id="nav">
+            <button onclick="createProject()">Create New Project</button>
+            <br/>
+            <div id="projects">
+
+            </div>
+            <br/>
+        </nav>
+        <div id="Content">
+            <div id="subNav">
+                <button onclick="addNode();">New Node</button>
+                <button onclick="linkNodes(this);">Link Nodes</button>
+            </div>
+            <div id="draw">
+
+            </div>
+        </div>
+        <script src="Code/JS/Calls.js"></script>
+        <script>
+            updateProjects();
+        </script>
+    </body>
+</html>

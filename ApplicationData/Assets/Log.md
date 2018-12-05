@@ -20,10 +20,23 @@ A node should not be able to be connect to another if it breaks the flow of the 
 
 ### Remaining
 -	Delete Links
+-	Position Nodes
 
 ------------
 
 #### Log
+[2018/12/05]
+
+Front-end has been implemented for the most part. I decided to not use any GUI framework, and instead rely on HTML. This proves beneficial as cross-platform is less of an issue. The only downside is that the project has to run as a web server.
+
+The interactions are all the same, however the design of the projectify.go file had to be changed to incorporate the interface functionality.
+
+Interactions are performed by sending a GET request to the project. (localhost:8080).
+
+Nodes can be visually linked, and can display their links accordingly. Nodes can also be repositioned on the screen, although this doesn't yet save, positioning was an intended feature near the start of the project.
+
+-----------
+
 [2018/12/03]
 
 Projects can be removed, and a list of all nodes can now be displayed.
