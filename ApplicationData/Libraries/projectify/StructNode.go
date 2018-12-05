@@ -11,11 +11,13 @@ type StructNode struct {
 	Connections []*StructNode
 	value       string
 	id          int
+	posX        float64
+	posY        float64
 }
 
 // New : Create basic object
-func (ref StructNode) New(id int, value string) StructNode {
-	n := StructNode{[]*StructNode{}, value, id}
+func (ref StructNode) New(id int, value string, x, y float64) StructNode {
+	n := StructNode{[]*StructNode{}, value, id, x, y}
 	return n
 }
 
@@ -55,7 +57,7 @@ func (ref *StructNode) AddConnection(node *StructNode) bool {
 }
 
 // Print : Displays connected nodes
-func (ref StructNode) Print(i int) {
+func (ref *StructNode) Print(i int) {
 	fmt.Println(ref.value + ":" + strconv.Itoa(i))
 	for i := 0; i < len(ref.Connections); i++ {
 		ref.Connections[i].Print(i + 1)
@@ -63,11 +65,21 @@ func (ref StructNode) Print(i int) {
 }
 
 // GetId : Retrieve Node's ID
-func (ref StructNode) GetId() int {
+func (ref *StructNode) GetId() int {
 	return ref.id
 }
 
 // GetValue : Retrieve Node's value
-func (ref StructNode) GetValue() string {
+func (ref *StructNode) GetValue() string {
 	return ref.value
+}
+
+// GetPosition : Return an array containing X:Y coordinates
+func (ref *StructNode) GetPosition() [2]float64 {
+	return [2]float64{ref.posX, ref.posY}
+}
+
+func (ref *StructNode) SetPosition(x, y float64) {
+	ref.posX = x
+	ref.posY = y
 }

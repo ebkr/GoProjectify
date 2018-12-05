@@ -139,40 +139,53 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 			fmt.Println("Name new node: ")
 			name := split[4]
 			generateProjectTree(&fileProject, &proj)
-			// Prevent duplicate names
-			for k := range proj.GetTree() {
-				if k.GetValue() == name {
-					return
-				}
+			result := fileProject.NewNode(proj.GetAvailableID(), name)
+			if !result {
+				writer.Write([]byte("WARN:Illegal Character"))
 			}
-			fileProject.AppendFile("<<TEMPLATES>>", strconv.Itoa(proj.GetAvailableID())+":"+name)
 		},
 		// Remove node
 		"RemoveNode": func() {
 			fmt.Println("-------->>")
 			generateProjectTree(&fileProject, &proj)
 			fmt.Println("Name of node: ")
-			node := proj.GetNodeByName(split[4])
-			if node != nil {
-				fileProject.RemoveLine(strconv.Itoa(node.GetId()) + ":" + node.GetValue())
+			id, err := strconv.Atoi(split[4])
+			if err == nil {
+				node := proj.GetNodeByID(id)
+				if node != nil {
+					fileProject.RemoveNode(node.GetId())
+				}
 			}
+		},
+		"RemoveLink": func() {
+			fmt.Println("-------->>")
+			fmt.Println("Start Node: ")
+			id1, _ := strconv.Atoi(split[4])
+			id2, _ := strconv.Atoi(split[5])
+			nodeA := proj.GetNodeByID(id1)
+			fmt.Println("End Node: ")
+			nodeB := proj.GetNodeByID(id2)
+			if nodeA != nil && nodeB != nil {
+				fileProject.RemoveLink(id1, id2)
+			}
+			generateProjectTree(&fileProject, &proj)
 		},
 		// Link nodes
 		"Link": func() {
 			fmt.Println("-------->>")
 			fmt.Println("Start Node: ")
-			nodeA := proj.GetNodeByName(split[4])
+			id1, _ := strconv.Atoi(split[4])
+			id2, _ := strconv.Atoi(split[5])
+			nodeA := proj.GetNodeByID(id1)
 			fmt.Println("End Node: ")
-			nodeB := proj.GetNodeByName(split[5])
+			nodeB := proj.GetNodeByID(id2)
 			if nodeA != nil && nodeB != nil {
 				fmt.Println("...........")
 				if nodeA.AddConnection(nodeB) {
 					fmt.Println("Connected " + nodeA.GetValue() + " to " + nodeB.GetValue())
-					fileProject.RemoveLine(strconv.Itoa(nodeA.GetId()) + ":" + strconv.Itoa(nodeB.GetId()))
-					fileProject.AppendFile("<<BINDS>>", strconv.Itoa(nodeA.GetId())+":"+strconv.Itoa(nodeB.GetId()))
+					fileProject.AppendFile("<<BINDS>>", split[4]+":"+split[5])
 				} else {
-					fmt.Println("Two nodes are already connected")
-					fmt.Println("Recursion is not allowed")
+					writer.Write([]byte("Action not allowed. Nodes are already connected" + "\n"))
 				}
 				fmt.Println("...........")
 			}
@@ -193,6 +206,19 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 				fmt.Println(strconv.Itoa(k.GetId()) + ":" + k.GetValue())
 			}
 		},
+		// Set node position
+		"Reposition": func() {
+			id, err1 := strconv.Atoi(split[4])
+			positions := strings.Split(split[5], ":")
+			x, err2 := strconv.Atoi(positions[0])
+			y, err3 := strconv.Atoi(positions[1])
+			if err1 == err2 && err1 == err3 && err1 == nil {
+				node := proj.GetNodeByID(id)
+				if node != nil {
+					fileProject.SetPosition(id, x, y)
+				}
+			}
+		},
 	}
 	// Display options, and handle selection
 	funcs[use]()
@@ -203,6 +229,9 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 		for i := 0; i < len(k.Connections); i++ {
 			writer.Write([]byte("Connection:" + strconv.Itoa(k.Connections[i].GetId()) + "\n"))
 		}
+		x := int(k.GetPosition()[0])
+		y := int(k.GetPosition()[1])
+		writer.Write([]byte("Position:" + strconv.Itoa(x) + ":" + strconv.Itoa(y) + "\n"))
 	}
 }
 

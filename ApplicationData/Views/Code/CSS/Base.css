@@ -10,11 +10,14 @@ html, body {
 body {
     display: grid;
     grid-template-columns: minmax(min-content, 200px) auto;
+    background-color: #fafafa;
+}
+nav {
+    min-height: 100vh;
 }
 
 nav, #projects {
     background-color: #212121;
-    min-height: 100vh;
     border-right: 1px solid #151515;
     font-size: 0.8em;
 }
@@ -70,6 +73,11 @@ nav > button:hover {
 
 .line {
     z-index: 90;
+}
+
+#draw {
+    max-height: 100%;
+    height: 100%;
 }
 
 #draw[selected] > div[attr-nodeId] {

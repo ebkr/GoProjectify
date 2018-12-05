@@ -53,6 +53,16 @@ func (ref *StructProject) GetNodeByName(name string) *StructNode {
 	return nil
 }
 
+// GetNodeByID : Return a StructNode via an ID search
+func (ref *StructProject) GetNodeByID(id int) *StructNode {
+	for k := range ref.templates {
+		if k.GetId() == id {
+			return k
+		}
+	}
+	return nil
+}
+
 // GetTree : Return the project's tree
 func (ref *StructProject) GetTree() map[*StructNode]string {
 	return ref.templates

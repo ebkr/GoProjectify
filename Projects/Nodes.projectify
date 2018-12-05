@@ -1,7 +1,0 @@
-# An empty GoProjectify project
-<<TEMPLATES>>
-1:N2
-0:N1
-<<BINDS>>
-0:1
-<<POSITIONS>>

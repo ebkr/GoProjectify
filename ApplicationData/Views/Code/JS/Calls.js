@@ -1,6 +1,7 @@
 let loadedProject = null;
 let currentNodes = [];
 
+// Prompt new file creation
 function createProject() {
     let projName = prompt("New Project Name");
     if (projName) {
@@ -10,6 +11,7 @@ function createProject() {
     }
 }
 
+// Adds a new node
 function addNode() {
     if (loadedProject) {
         let nodeName = prompt("New Node Name: ");
@@ -29,6 +31,7 @@ function addNode() {
     }
 }
 
+// Link two nodes together
 function link(a, b) {
     if (loadedProject) {
         if (a && b) {
@@ -46,32 +49,33 @@ function link(a, b) {
     }
 }
 
+// Calls link(x,y). Creates link between two clicked nodes.
 function linkNodes(obj) {
     $("#draw").attr("selected", "true");
     let clicked_a = false;
     let clicked_b = false;
     $("#draw").click(function(e) {
-        console.log("Click");
         if (!clicked_a) {
             clicked_a = e.target;
         } else if (!clicked_b) {
             clicked_b = e.target;
             $("#draw").attr("selected", null);
             if (clicked_a != clicked_b) {
-                if (clicked_a.getAttribute("attr-nodeId") && clicked_b.getAttribute("attr-nodeId")) {
-                    link(clicked_a.innerText, clicked_b.innerText);
+                if ($(clicked_a).attr("attr-nodeId") && $(clicked_b).attr("attr-nodeId")) {
+                    link($(clicked_a).attr("attr-nodeId") , $(clicked_b).attr("attr-nodeId"));
                 }
             }
         }
     })
 }
 
-function removeNode(nodeName) {
+// Removes a node from the project
+function removeNode(nodeId) {
     if (loadedProject) {
-        if (nodeName) {
+        if (nodeId) {
             var oReq = new XMLHttpRequest();
             console.log(loadedProject);
-            oReq.open("GET", "/api/LoadProject/RemoveNode/" + nodeName + "/_/" + loadedProject);
+            oReq.open("GET", "/api/LoadProject/RemoveNode/" + nodeId + "/_/" + loadedProject);
             oReq.addEventListener("load", function(res){
                 let tree = parseCallOutput(res.currentTarget.responseText, []);
                 currentNodes = tree;
@@ -84,6 +88,7 @@ function removeNode(nodeName) {
     }
 }
 
+// Load project details
 function loadProject(text) {
     var oReq = new XMLHttpRequest();
     oReq.open("GET", "/api/LoadProject/None/_/_/" + text);
@@ -96,6 +101,7 @@ function loadProject(text) {
     oReq.send();
 }
 
+// Update a list of files on the left
 function updateProjects() {
     var oReq = new XMLHttpRequest();
     oReq.addEventListener("load", function(res){
@@ -112,6 +118,7 @@ function updateProjects() {
     oReq.send();
 }
 
+// Turn <<GENERATE>> in to nodes.
 function parseCallOutput(str, nodeTree) {
     console.log(str);
     found = false;
@@ -129,14 +136,16 @@ function parseCallOutput(str, nodeTree) {
                 nodeTree.push(node);
             } else if (lineSplit[0] == "Connection") {
                 node.connections = node.connections || [];
-                console.log("C:" + node.value + ":" + lineSplit[1]);
                 node.connections.push(lineSplit[1]);
+            } else if (lineSplit[0] == "Position") {
+                node.positions = [Number(lineSplit[1]), Number(lineSplit[2])];
             }
         }
     }
     return nodeTree;
 }
 
+// Draws generated nodes under {let currentNodes OF TYPE []}
 function drawNodes() {
     let connections = [];
     document.getElementById("draw").innerHTML = null;
@@ -148,20 +157,24 @@ function drawNodes() {
         node.className = "node";
         document.getElementById("draw").append(node);
         $(node).draggable({ 
-            scroll: false,
+            scroll: true,
+            containment: "#draw",
             drag: function(){
-                var offset = $(node).offset();
-                var xPos = offset.left;
-                var yPos = offset.top;
-                currentNodes[i].positions[0] = xPos;
-                currentNodes[i].positions[1] = yPos;
+                var thisPos = $(node).position();
+                var x = thisPos.left;
+                var y = thisPos.top;
+                currentNodes[i].positions[0] = x;
+                currentNodes[i].positions[1] = y;
             },
             stop: function() {
+                var oReq = new XMLHttpRequest();
+                oReq.open("GET", "/api/LoadProject/Reposition/" + currentNodes[i].id + "/" + currentNodes[i].positions[0] + ":" + currentNodes[i].positions[1] + "/" + loadedProject);
+                oReq.send();
                 drawNodes();
             }
         });
         $(node).dblclick(function() {
-            removeNode(currentNodes[i].value);
+            removeNode(currentNodes[i].id);
         });
         currentNodes[i].connections = currentNodes[i].connections || [];
         currentNodes[i].positions = currentNodes[i].positions || [0, 0];

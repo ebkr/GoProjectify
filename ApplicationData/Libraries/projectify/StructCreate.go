@@ -3,6 +3,7 @@ package projectify
 import (
 	"bufio"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -53,7 +54,7 @@ func (ref StructCreate) AppendFile(after, newLine string) bool {
 }
 
 // RemoveLine : Used to remove a line from the text document
-func (ref *StructCreate) RemoveLine(search string) bool {
+func (ref *StructCreate) removeLine(search string) bool {
 	ref.updateReadData()
 	split := strings.Split(ref.data, "\n")
 	ref.data = ""
@@ -69,6 +70,86 @@ func (ref *StructCreate) RemoveLine(search string) bool {
 		ref.OverwriteFile(ref.data)
 	}
 	return removed
+}
+
+func (ref *StructCreate) getTextInSection(region string) []string {
+	ref.updateReadData()
+	var stringBuilder string
+	split := strings.Split(ref.data, "\n")
+	var section string
+	for i := 0; i < len(split); i++ {
+		if split[i] == region {
+			section = split[i]
+		} else if section == region {
+			stringBuilder += split[i] + "\n"
+		}
+	}
+	if stringBuilder == "" {
+		return []string{}
+	} else {
+		group := strings.Split(stringBuilder, "\n")
+		return group[:len(group)-1]
+	}
+}
+
+// NewNode : Creates a new node, assuming no "illegal" characters exist. Returns true if successful.
+func (ref *StructCreate) NewNode(id int, nodeName string) bool {
+	split := strings.Split(nodeName, "<")
+	if len(split) > 1 {
+		return false
+	}
+	split = strings.Split(split[0], ":")
+	if len(split) > 1 {
+		return false
+	}
+	ref.AppendFile("<<TEMPLATES>>", strconv.Itoa(id)+":"+split[0])
+	return true
+}
+
+func (ref *StructCreate) RemoveNode(nodeId int) {
+	// Remove Templates
+	data := ref.getTextInSection("<<TEMPLATES>>")
+	for i := 0; i < len(data); i++ {
+		split := strings.Split(data[i], ":")
+		if split[0] == strconv.Itoa(nodeId) {
+			ref.removeLine(data[i])
+		}
+	}
+	// Remove Links
+	data = ref.getTextInSection("<<BINDS>>")
+	for i := 0; i < len(data); i++ {
+		split := strings.Split(data[i], ":")
+		for j := 0; j < len(split); j++ {
+			if split[j] == strconv.Itoa(nodeId) {
+				ref.removeLine(data[i])
+			}
+		}
+	}
+}
+
+func (ref *StructCreate) RemoveLink(nodeIdA, nodeIdB int) {
+	// Remove Links
+	data := ref.getTextInSection("<<BINDS>>")
+	for i := 0; i < len(data); i++ {
+		split := strings.Split(data[i], ":")
+		if split[0] == strconv.Itoa(nodeIdA) || split[0] == strconv.Itoa(nodeIdB) {
+			ref.removeLine(data[i])
+		} else if split[1] == strconv.Itoa(nodeIdA) || split[1] == strconv.Itoa(nodeIdB) {
+			ref.removeLine(data[i])
+		}
+	}
+}
+
+func (ref *StructCreate) SetPosition(nodeId, x, y int) {
+	// Remove Links
+	data := ref.getTextInSection("<<POSITIONS>>")
+	for i := 0; i < len(data); i++ {
+		split := strings.Split(data[i], ":")
+		if split[0] == "["+strconv.Itoa(nodeId)+"]" {
+			ref.removeLine(data[i])
+		}
+	}
+	ref.AppendFile("<<POSITIONS>>", "["+strconv.Itoa(nodeId)+"]:"+strconv.Itoa(x)+":"+strconv.Itoa(y))
 }
 
 // GenerateNodeTree : Creates an array of StructNodes, and links them together using the StructCreate Data
@@ -90,7 +171,7 @@ func (ref *StructCreate) GenerateNodeTree() []*StructNode {
 				id, err := strconv.Atoi(splitTwice[0])
 				if err == nil {
 					value := splitTwice[1]
-					tempNode := StructNode{}.New(id, value)
+					tempNode := StructNode{}.New(id, value, 0, 0)
 					templateNodes = append(templateNodes, &tempNode)
 				}
 			} else if action == "<<BINDS>>" {
@@ -109,6 +190,23 @@ func (ref *StructCreate) GenerateNodeTree() []*StructNode {
 					}
 					if nodeA != nil && nodeB != nil {
 						nodeA.AddConnection(nodeB)
+					}
+				}
+			} else if action == "<<POSITIONS>>" {
+				splitThrice := strings.Split(split[i], ":")
+				if len(splitThrice) == 3 {
+					idString := regexp.MustCompile("[0-9]+").FindString(splitThrice[0])
+					id, err := strconv.Atoi(idString)
+					if err == nil {
+						x, errX := strconv.Atoi(splitThrice[1])
+						y, errY := strconv.Atoi(splitThrice[2])
+						if errX == errY && errX == nil {
+							for search := 0; search < len(templateNodes); search++ {
+								if templateNodes[search].GetId() == id {
+									templateNodes[search].SetPosition(float64(x), float64(y))
+								}
+							}
+						}
 					}
 				}
 			}
