@@ -23,26 +23,20 @@ func (ref StructNode) New(id int, value string, x, y float64) StructNode {
 
 // isConnected : Compares connected nodes, to prevent recursive connections
 func (ref *StructNode) isConnected(node *StructNode) bool {
+	return node.recursiveFind(ref)
+}
+
+func (ref *StructNode) recursiveFind(node *StructNode) bool {
 	if ref == node {
 		return true
 	} else {
-		found := false
 		for _, v := range ref.Connections {
-			if v == node {
+			if v.recursiveFind(node) {
 				return true
-			} else {
-				found = found || v.isConnected(node)
 			}
 		}
-		for _, v := range node.Connections {
-			if v == ref {
-				return true
-			} else {
-				found = found || v.isConnected(ref)
-			}
-		}
-		return found
 	}
+	return false
 }
 
 // AddConnection : Calls upon isConnected to determine if connection is valid. Will connect if valid.
