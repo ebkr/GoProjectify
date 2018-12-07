@@ -157,7 +157,7 @@ function drawNodes() {
         node.className = "node";
         document.getElementById("draw").append(node);
         $(node).draggable({ 
-            scroll: true,
+            scroll: false,
             containment: "#draw",
             drag: function(){
                 var thisPos = $(node).position();

@@ -53,23 +53,6 @@ func main() {
 		}
 	})
 	http.ListenAndServe(":8080", nil)
-	// Display selections
-	/*
-		fmt.Println("Select an option: ")
-		fmt.Println("1. New Project")
-		fmt.Println("2. Load Project")
-		fmt.Println("3. Delete Project")
-		fmt.Println("4. Exit")
-		// Allow option selection
-		var num, err = strconv.Atoi(readInput())
-		if err == nil {
-			if appController(num) == true {
-				main()
-			}
-		} else {
-			main()
-		}
-	*/
 }
 
 func appController(area int) bool {
