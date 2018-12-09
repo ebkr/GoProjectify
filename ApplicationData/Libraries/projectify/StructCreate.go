@@ -16,8 +16,8 @@ type StructCreate struct {
 }
 
 // New : Used to generate a working Struct
-func (ref StructCreate) New(Name string) StructCreate {
-	c := StructCreate{Name, "./Projects/", ""}
+func (ref StructCreate) New(Directory, Name string) StructCreate {
+	c := StructCreate{Name, Directory, ""}
 	return c
 }
 
@@ -72,6 +72,7 @@ func (ref *StructCreate) removeLine(search string) bool {
 	return removed
 }
 
+// getTextInSection : Scan through update data, and get each line within a section (<<SECTION>>)
 func (ref *StructCreate) getTextInSection(region string) []string {
 	ref.updateReadData()
 	var stringBuilder string
@@ -106,6 +107,7 @@ func (ref *StructCreate) NewNode(id int, nodeName string) bool {
 	return true
 }
 
+// RemoveNode : Remove node from projectify file with ID of nodeId
 func (ref *StructCreate) RemoveNode(nodeId int) {
 	// Remove Templates
 	data := ref.getTextInSection("<<TEMPLATES>>")
@@ -127,6 +129,7 @@ func (ref *StructCreate) RemoveNode(nodeId int) {
 	}
 }
 
+// RemoveLink : Remove connection between NodeIdA and NodeIdB in projectify file
 func (ref *StructCreate) RemoveLink(nodeIdA, nodeIdB int) {
 	// Remove Links
 	data := ref.getTextInSection("<<BINDS>>")
@@ -140,6 +143,7 @@ func (ref *StructCreate) RemoveLink(nodeIdA, nodeIdB int) {
 	}
 }
 
+// SetPosition : Update the position of nodeId in the projectify file.
 func (ref *StructCreate) SetPosition(nodeId, x, y int) {
 	// Remove Links
 	data := ref.getTextInSection("<<POSITIONS>>")
@@ -228,10 +232,12 @@ func (ref *StructCreate) updateReadData() {
 	}
 }
 
+// Delete : Delete the file/directory
 func (ref *StructCreate) Delete() {
 	os.Remove(ref.Dir + ref.Name)
 }
 
+// CheckExistence : Used to check if file/directory exists.
 func (ref *StructCreate) CheckExistence() bool {
 	_, err := os.Stat(ref.Dir + ref.Name)
 	if err != nil {

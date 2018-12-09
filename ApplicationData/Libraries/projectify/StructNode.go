@@ -26,6 +26,7 @@ func (ref *StructNode) isConnected(node *StructNode) bool {
 	return node.recursiveFind(ref)
 }
 
+// recursiveFind : Attempts to find a node object in all connections, and subsequent connections.
 func (ref *StructNode) recursiveFind(node *StructNode) bool {
 	if ref == node {
 		return true
@@ -73,6 +74,7 @@ func (ref *StructNode) GetPosition() [2]float64 {
 	return [2]float64{ref.posX, ref.posY}
 }
 
+// SetPosition : Set X and Y coordinates
 func (ref *StructNode) SetPosition(x, y float64) {
 	ref.posX = x
 	ref.posY = y

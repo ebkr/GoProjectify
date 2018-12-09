@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -10,16 +11,11 @@ import (
 	"./ApplicationData/Libraries/projectify"
 )
 
+// Globals
 var loadedProject projectify.StructProject
+var configData projectify.StructConf
 
-// Handle user input
-func readInput() string {
-	fmt.Print("> ")
-	var inp string
-	fmt.Scanln(&inp)
-	return inp
-}
-
+// buildString : Build a string from an array, starting at index
 func buildString(array []string, index int) string {
 	var str = "/"
 	for i := index; i < len(array); i++ {
@@ -28,15 +24,52 @@ func buildString(array []string, index int) string {
 	return str[:len(str)-1]
 }
 
+// buildApplicationReguirements : Create Project directory, and default configurations
+func buildApplicationRequirements(workingDir string) {
+	configs := map[string][]string{
+		"Server.conf": []string{"URL:localhost", "Port:8080", "ProjectDirectory:" + workingDir + "\\Projects"},
+	}
+	// Create Config directory
+	configFolder := projectify.StructCreate{}.New(workingDir+"/Config", "")
+	if !configFolder.CheckExistence() {
+		os.Mkdir(workingDir+"/Config", os.FileMode(0755))
+		// Create config files defined in "configs" variable.
+		for file, data := range configs {
+			f := projectify.StructCreate{}.New(workingDir+"/Config/", file)
+			if !f.CheckExistence() {
+				var builder string
+				for _, line := range data {
+					builder += line + "\n"
+				}
+				f.OverwriteFile(builder)
+			}
+		}
+	}
+	// Assign global to new config
+	configData = projectify.StructConf{}.New(workingDir + "/Config/Server.conf")
+
+	// Create Project directory
+	projectFolder := projectify.StructCreate{}.New(configData.GetKey("ProjectDirectory"), "")
+	if !projectFolder.CheckExistence() {
+		os.Mkdir(configData.GetKey("ProjectDirectory"), os.FileMode(0755))
+	}
+}
+
+// main : Main Method, loads web server
 func main() {
-	http.Handle("/", http.FileServer(http.Dir("./ApplicationData/Views")))
+	workingDir, dirErr := os.Getwd()
+	if dirErr != nil {
+		panic("Can't get the working directory")
+	}
+	buildApplicationRequirements(workingDir)
+	http.Handle("/", http.FileServer(http.Dir(workingDir+"\\ApplicationData\\Views")))
 	http.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
 		split := strings.Split(r.URL.Path, "/")
 		if split[2] == "GetProjects" {
-			files, err := filepath.Glob("./Projects/*.projectify")
+			files, err := filepath.Glob(configData.GetKey("ProjectDirectory") + "\\*.projectify")
 			if err == nil {
 				for i := 0; i < len(files); i++ {
-					str := strings.TrimLeft(files[i], "Projects\\")
+					str := files[i][(len(configData.GetKey("ProjectDirectory")) + 1):]
 					str = str[:len(str)-11]
 					w.Write([]byte(str))
 					if i < len(files)-1 {
@@ -46,45 +79,13 @@ func main() {
 			}
 		} else if split[2] == "NewProject" {
 			str := buildString(split, 3)
-			create := projectify.StructCreate{}.New(str + ".projectify")
+			create := projectify.StructCreate{}.New(configData.GetKey("ProjectDirectory")+"\\", str+".projectify")
 			create.OverwriteFile("# An empty GoProjectify project\n<<TEMPLATES>>\n<<BINDS>>\n<<POSITIONS>>")
 		} else if split[2] == "LoadProject" {
 			loadCase(buildString(split, 6), split[3], split, &w, r)
 		}
 	})
-	http.ListenAndServe(":8080", nil)
-}
-
-func appController(area int) bool {
-	fmt.Println("----------")
-	switch area {
-	case 1:
-		// Create a new projectify project under /Projects
-		fmt.Println("Enter a project name (No Spaces): ")
-		create := projectify.StructCreate{}.New(readInput() + ".projectify")
-		create.OverwriteFile("# An empty GoProjectify project\n<<TEMPLATES>>\n<<BINDS>>\n<<POSITIONS>>")
-		break
-	case 2:
-		// Load project
-		fmt.Println("Enter project name: ")
-		//loadCase(readInput())
-		break
-	case 3:
-		// Delete project
-		fmt.Println("Delete Project")
-		deleteCase(readInput())
-		break
-	case 4:
-		// Exits the program
-		fmt.Println("Exit")
-		fmt.Println("----------")
-		fmt.Println("----------")
-		fmt.Println("APPLICATION EXIT")
-		fmt.Println("----------")
-		return false
-	}
-	fmt.Println("----------")
-	return true
+	http.ListenAndServe(configData.GetKey("URL")+":"+configData.GetKey("Port"), nil)
 }
 
 // Generate Project Tree
@@ -103,7 +104,7 @@ func generateProjectTree(fileProject *projectify.StructCreate, proj *projectify.
 // Provides options for loaded project
 func loadCase(load string, use string, split []string, w *http.ResponseWriter, r *http.Request) {
 	writer := *w
-	fileProject := projectify.StructCreate{}.New(load + ".projectify")
+	fileProject := projectify.StructCreate{}.New(configData.GetKey("ProjectDirectory")+"\\", load+".projectify")
 	if !fileProject.CheckExistence() {
 		fmt.Println(fileProject.Dir + fileProject.Name)
 		fmt.Println("File Not Found")
@@ -218,8 +219,9 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 	}
 }
 
+// deleteCase : Delete a project
 func deleteCase(load string) {
-	fileProject := projectify.StructCreate{}.New(load + ".projectify")
+	fileProject := projectify.StructCreate{}.New(configData.GetKey("ProjectDirectory")+"\\", load+".projectify")
 	if fileProject.CheckExistence() {
 		fileProject.Delete()
 		fmt.Println("Deleted Project: " + load)
