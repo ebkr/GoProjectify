@@ -26,7 +26,7 @@ func buildString(array []string, index int) string {
 // buildApplicationReguirements : Create Project directory, and default configurations
 func buildApplicationRequirements(workingDir string) {
 	configs := map[string][]string{
-		"Server.conf": []string{"URL:localhost", "Port:8080", "ProjectDirectory:" + workingDir + "\\Projects"},
+		"Server.ini": []string{"URL:localhost", "Port:8080", "ProjectDirectory:" + workingDir + "\\Projects"},
 	}
 	// Create Config directory
 	configFolder := projectify.StructCreate{}.New(workingDir+"/Config", "")
@@ -45,8 +45,7 @@ func buildApplicationRequirements(workingDir string) {
 		}
 	}
 	// Assign global to new config
-	configData = projectify.StructConf{}.New(workingDir + "/Config/Server.conf")
-
+	configData = projectify.StructConf{}.New(workingDir + "/Config/Server.ini")
 	// Create Project directory
 	projectFolder := projectify.StructCreate{}.New(configData.GetKey("ProjectDirectory"), "")
 	if !projectFolder.CheckExistence() {
