@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -106,8 +105,6 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 	writer := *w
 	fileProject := projectify.StructCreate{}.New(configData.GetKey("ProjectDirectory")+"\\", load+".projectify")
 	if !fileProject.CheckExistence() {
-		fmt.Println(fileProject.Dir + fileProject.Name)
-		fmt.Println("File Not Found")
 		return
 	}
 	loadedProject = projectify.StructProject{}
@@ -119,8 +116,6 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 	funcs := map[string]func(){
 		"None": func() {},
 		"NewNode": func() {
-			fmt.Println("-------->>")
-			fmt.Println("Name new node: ")
 			name := split[4]
 			generateProjectTree(&fileProject, &proj)
 			result := fileProject.NewNode(proj.GetAvailableID(), name)
@@ -130,24 +125,19 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 		},
 		// Remove node
 		"RemoveNode": func() {
-			fmt.Println("-------->>")
 			generateProjectTree(&fileProject, &proj)
-			fmt.Println("Name of node: ")
 			id, err := strconv.Atoi(split[4])
 			if err == nil {
 				node := proj.GetNodeByID(id)
 				if node != nil {
-					fileProject.RemoveNode(node.GetId())
+					fileProject.RemoveNode(node.GetID())
 				}
 			}
 		},
 		"RemoveLink": func() {
-			fmt.Println("-------->>")
-			fmt.Println("Start Node: ")
 			id1, _ := strconv.Atoi(split[4])
 			id2, _ := strconv.Atoi(split[5])
 			nodeA := proj.GetNodeByID(id1)
-			fmt.Println("End Node: ")
 			nodeB := proj.GetNodeByID(id2)
 			if nodeA != nil && nodeB != nil {
 				fileProject.RemoveLink(id1, id2)
@@ -156,22 +146,16 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 		},
 		// Link nodes
 		"Link": func() {
-			fmt.Println("-------->>")
-			fmt.Println("Start Node: ")
 			id1, _ := strconv.Atoi(split[4])
 			id2, _ := strconv.Atoi(split[5])
 			nodeA := proj.GetNodeByID(id1)
-			fmt.Println("End Node: ")
 			nodeB := proj.GetNodeByID(id2)
 			if nodeA != nil && nodeB != nil {
-				fmt.Println("...........")
 				if nodeA.AddConnection(nodeB) {
-					fmt.Println("Connected " + nodeA.GetValue() + " to " + nodeB.GetValue())
 					fileProject.AppendFile("<<BINDS>>", split[4]+":"+split[5])
 				} else {
 					writer.Write([]byte("Action not allowed. Nodes are already connected" + "\n"))
 				}
-				fmt.Println("...........")
 			}
 			generateProjectTree(&fileProject, &proj)
 		},
@@ -184,11 +168,6 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 		},
 		// Get all nodes
 		"Get": func() {
-			fmt.Println("-------->>")
-			fmt.Println("Nodes: ")
-			for k := range proj.GetTree() {
-				fmt.Println(strconv.Itoa(k.GetId()) + ":" + k.GetValue())
-			}
 		},
 		// Set node position
 		"Reposition": func() {
@@ -209,9 +188,9 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 	generateProjectTree(&fileProject, &proj)
 	writer.Write([]byte("<<GENERATE>>\n"))
 	for k := range proj.GetTree() {
-		writer.Write([]byte("Node:" + strconv.Itoa(k.GetId()) + ":" + k.GetValue() + "\n"))
+		writer.Write([]byte("Node:" + strconv.Itoa(k.GetID()) + ":" + k.GetValue() + "\n"))
 		for i := 0; i < len(k.Connections); i++ {
-			writer.Write([]byte("Connection:" + strconv.Itoa(k.Connections[i].GetId()) + "\n"))
+			writer.Write([]byte("Connection:" + strconv.Itoa(k.Connections[i].GetID()) + "\n"))
 		}
 		x := int(k.GetPosition()[0])
 		y := int(k.GetPosition()[1])
@@ -224,8 +203,5 @@ func deleteCase(load string) {
 	fileProject := projectify.StructCreate{}.New(configData.GetKey("ProjectDirectory")+"\\", load+".projectify")
 	if fileProject.CheckExistence() {
 		fileProject.Delete()
-		fmt.Println("Deleted Project: " + load)
-	} else {
-		fmt.Println("Invalid Name")
 	}
 }

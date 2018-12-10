@@ -12,10 +12,12 @@ type StructConf struct {
 	configs map[string]string
 }
 
+// New : Generates defaults
 func (ref StructConf) New(path string) StructConf {
 	return StructConf{path, map[string]string{}}
 }
 
+// update : Updates configuration data
 func (ref *StructConf) update() {
 	file, err := os.OpenFile(ref.path, os.O_RDONLY|os.O_CREATE, 0666)
 	if err == nil {
@@ -35,6 +37,7 @@ func (ref *StructConf) update() {
 	}
 }
 
+// GetKey : Returns the string associated with the config key
 func (ref *StructConf) GetKey(key string) string {
 	ref.update()
 	return ref.configs[key]

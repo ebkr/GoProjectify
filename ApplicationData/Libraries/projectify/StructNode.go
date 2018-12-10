@@ -30,11 +30,10 @@ func (ref *StructNode) isConnected(node *StructNode) bool {
 func (ref *StructNode) recursiveFind(node *StructNode) bool {
 	if ref == node {
 		return true
-	} else {
-		for _, v := range ref.Connections {
-			if v.recursiveFind(node) {
-				return true
-			}
+	}
+	for _, v := range ref.Connections {
+		if v.recursiveFind(node) {
+			return true
 		}
 	}
 	return false
@@ -46,9 +45,8 @@ func (ref *StructNode) AddConnection(node *StructNode) bool {
 		arr := append(ref.Connections, node)
 		ref.Connections = arr
 		return true
-	} else {
-		return false
 	}
+	return false
 }
 
 // Print : Displays connected nodes
@@ -59,8 +57,8 @@ func (ref *StructNode) Print(i int) {
 	}
 }
 
-// GetId : Retrieve Node's ID
-func (ref *StructNode) GetId() int {
+// GetID : Retrieve Node's ID
+func (ref *StructNode) GetID() int {
 	return ref.id
 }
 

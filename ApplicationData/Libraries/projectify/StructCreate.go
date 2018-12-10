@@ -26,11 +26,10 @@ func (ref StructCreate) OverwriteFile(data string) bool {
 	file, err := os.OpenFile(ref.Dir+ref.Name, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return false
-	} else {
-		file.Truncate(0)
-		file.WriteString(data)
-		file.Close()
 	}
+	file.Truncate(0)
+	file.WriteString(data)
+	file.Close()
 	return true
 }
 
@@ -39,18 +38,17 @@ func (ref StructCreate) AppendFile(after, newLine string) bool {
 	file, err := os.OpenFile(ref.Dir+ref.Name, os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return false
-	} else {
-		scanner := bufio.NewScanner(file)
-		text := ""
-		for scanner.Scan() {
-			text += scanner.Text() + "\n"
-			if scanner.Text() == after {
-				text += newLine + "\n"
-			}
-		}
-		file.Close()
-		return ref.OverwriteFile(text)
 	}
+	scanner := bufio.NewScanner(file)
+	text := ""
+	for scanner.Scan() {
+		text += scanner.Text() + "\n"
+		if scanner.Text() == after {
+			text += newLine + "\n"
+		}
+	}
+	file.Close()
+	return ref.OverwriteFile(text)
 }
 
 // RemoveLine : Used to remove a line from the text document
@@ -87,10 +85,9 @@ func (ref *StructCreate) getTextInSection(region string) []string {
 	}
 	if stringBuilder == "" {
 		return []string{}
-	} else {
-		group := strings.Split(stringBuilder, "\n")
-		return group[:len(group)-1]
 	}
+	group := strings.Split(stringBuilder, "\n")
+	return group[:len(group)-1]
 }
 
 // NewNode : Creates a new node, assuming no "illegal" characters exist. Returns true if successful.
@@ -108,12 +105,12 @@ func (ref *StructCreate) NewNode(id int, nodeName string) bool {
 }
 
 // RemoveNode : Remove node from projectify file with ID of nodeId
-func (ref *StructCreate) RemoveNode(nodeId int) {
+func (ref *StructCreate) RemoveNode(nodeID int) {
 	// Remove Templates
 	data := ref.getTextInSection("<<TEMPLATES>>")
 	for i := 0; i < len(data); i++ {
 		split := strings.Split(data[i], ":")
-		if split[0] == strconv.Itoa(nodeId) {
+		if split[0] == strconv.Itoa(nodeID) {
 			ref.removeLine(data[i])
 		}
 	}
@@ -122,7 +119,7 @@ func (ref *StructCreate) RemoveNode(nodeId int) {
 	for i := 0; i < len(data); i++ {
 		split := strings.Split(data[i], ":")
 		for j := 0; j < len(split); j++ {
-			if split[j] == strconv.Itoa(nodeId) {
+			if split[j] == strconv.Itoa(nodeID) {
 				ref.removeLine(data[i])
 			}
 		}
@@ -130,30 +127,30 @@ func (ref *StructCreate) RemoveNode(nodeId int) {
 }
 
 // RemoveLink : Remove connection between NodeIdA and NodeIdB in projectify file
-func (ref *StructCreate) RemoveLink(nodeIdA, nodeIdB int) {
+func (ref *StructCreate) RemoveLink(nodeIDA, nodeIDB int) {
 	// Remove Links
 	data := ref.getTextInSection("<<BINDS>>")
 	for i := 0; i < len(data); i++ {
 		split := strings.Split(data[i], ":")
-		if split[0] == strconv.Itoa(nodeIdA) || split[0] == strconv.Itoa(nodeIdB) {
+		if split[0] == strconv.Itoa(nodeIDA) || split[0] == strconv.Itoa(nodeIDB) {
 			ref.removeLine(data[i])
-		} else if split[1] == strconv.Itoa(nodeIdA) || split[1] == strconv.Itoa(nodeIdB) {
+		} else if split[1] == strconv.Itoa(nodeIDA) || split[1] == strconv.Itoa(nodeIDB) {
 			ref.removeLine(data[i])
 		}
 	}
 }
 
 // SetPosition : Update the position of nodeId in the projectify file.
-func (ref *StructCreate) SetPosition(nodeId, x, y int) {
+func (ref *StructCreate) SetPosition(nodeID, x, y int) {
 	// Remove Links
 	data := ref.getTextInSection("<<POSITIONS>>")
 	for i := 0; i < len(data); i++ {
 		split := strings.Split(data[i], ":")
-		if split[0] == "["+strconv.Itoa(nodeId)+"]" {
+		if split[0] == "["+strconv.Itoa(nodeID)+"]" {
 			ref.removeLine(data[i])
 		}
 	}
-	ref.AppendFile("<<POSITIONS>>", "["+strconv.Itoa(nodeId)+"]:"+strconv.Itoa(x)+":"+strconv.Itoa(y))
+	ref.AppendFile("<<POSITIONS>>", "["+strconv.Itoa(nodeID)+"]:"+strconv.Itoa(x)+":"+strconv.Itoa(y))
 }
 
 // GenerateNodeTree : Creates an array of StructNodes, and links them together using the StructCreate Data
@@ -186,9 +183,9 @@ func (ref *StructCreate) GenerateNodeTree() []*StructNode {
 					var nodeA *StructNode
 					var nodeB *StructNode
 					for search := 0; search < len(templateNodes); search++ {
-						if templateNodes[search].GetId() == id {
+						if templateNodes[search].GetID() == id {
 							nodeA = templateNodes[search]
-						} else if templateNodes[search].GetId() == id2 {
+						} else if templateNodes[search].GetID() == id2 {
 							nodeB = templateNodes[search]
 						}
 					}
@@ -206,7 +203,7 @@ func (ref *StructCreate) GenerateNodeTree() []*StructNode {
 						y, errY := strconv.Atoi(splitThrice[2])
 						if errX == errY && errX == nil {
 							for search := 0; search < len(templateNodes); search++ {
-								if templateNodes[search].GetId() == id {
+								if templateNodes[search].GetID() == id {
 									templateNodes[search].SetPosition(float64(x), float64(y))
 								}
 							}
