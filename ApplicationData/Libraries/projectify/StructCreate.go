@@ -176,44 +176,56 @@ func (ref *StructCreate) GenerateNodeTree() []*StructNode {
 					templateNodes = append(templateNodes, &tempNode)
 				}
 			} else if action == "<<BINDS>>" {
-				splitTwice := strings.Split(split[i], ":")
-				id, err := strconv.Atoi(splitTwice[0])
-				id2, err2 := strconv.Atoi(splitTwice[1])
-				if err == nil && err2 == nil {
-					var nodeA *StructNode
-					var nodeB *StructNode
-					for search := 0; search < len(templateNodes); search++ {
-						if templateNodes[search].GetID() == id {
-							nodeA = templateNodes[search]
-						} else if templateNodes[search].GetID() == id2 {
-							nodeB = templateNodes[search]
-						}
-					}
-					if nodeA != nil && nodeB != nil {
-						nodeA.AddConnection(nodeB)
-					}
-				}
+				nodeSectionBinds(split, i, &templateNodes)
 			} else if action == "<<POSITIONS>>" {
-				splitThrice := strings.Split(split[i], ":")
-				if len(splitThrice) == 3 {
-					idString := regexp.MustCompile("[0-9]+").FindString(splitThrice[0])
-					id, err := strconv.Atoi(idString)
-					if err == nil {
-						x, errX := strconv.Atoi(splitThrice[1])
-						y, errY := strconv.Atoi(splitThrice[2])
-						if errX == errY && errX == nil {
-							for search := 0; search < len(templateNodes); search++ {
-								if templateNodes[search].GetID() == id {
-									templateNodes[search].SetPosition(float64(x), float64(y))
-								}
-							}
-						}
+				nodeSectionPositions(split, i, &templateNodes)
+			}
+		}
+	}
+	return templateNodes
+}
+
+// nodeSectionBinds : Generate connections for nodes, called in GenerateNodeTree()
+func nodeSectionBinds(split []string, i int, nodes *[]*StructNode) {
+	templateNodes := *nodes
+	splitTwice := strings.Split(split[i], ":")
+	id, err := strconv.Atoi(splitTwice[0])
+	id2, err2 := strconv.Atoi(splitTwice[1])
+	if err == nil && err2 == nil {
+		var nodeA *StructNode
+		var nodeB *StructNode
+		for search := 0; search < len(templateNodes); search++ {
+			if templateNodes[search].GetID() == id {
+				nodeA = templateNodes[search]
+			} else if templateNodes[search].GetID() == id2 {
+				nodeB = templateNodes[search]
+			}
+		}
+		if nodeA != nil && nodeB != nil {
+			nodeA.AddConnection(nodeB)
+		}
+	}
+}
+
+// nodeSectionPositions : Generate positions for nodes, called in GenerateNodeTree()
+func nodeSectionPositions(split []string, i int, nodes *[]*StructNode) {
+	templateNodes := *nodes
+	splitThrice := strings.Split(split[i], ":")
+	if len(splitThrice) == 3 {
+		idString := regexp.MustCompile("[0-9]+").FindString(splitThrice[0])
+		id, err := strconv.Atoi(idString)
+		if err == nil {
+			x, errX := strconv.Atoi(splitThrice[1])
+			y, errY := strconv.Atoi(splitThrice[2])
+			if errX == errY && errX == nil {
+				for search := 0; search < len(templateNodes); search++ {
+					if templateNodes[search].GetID() == id {
+						templateNodes[search].SetPosition(float64(x), float64(y))
 					}
 				}
 			}
 		}
 	}
-	return templateNodes
 }
 
 // updateReadData : Read the corresponding file, and place in to data field.
