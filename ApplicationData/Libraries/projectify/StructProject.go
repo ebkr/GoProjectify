@@ -32,7 +32,7 @@ func (ref *StructProject) GetAvailableID() int {
 	id := -1
 	numeric := []int{}
 	for k := range ref.templates {
-		numeric = append(numeric, k.GetId())
+		numeric = append(numeric, k.GetID())
 	}
 	sort.Ints(numeric)
 	for i := 0; i < len(numeric); i++ {
@@ -56,7 +56,7 @@ func (ref *StructProject) GetNodeByName(name string) *StructNode {
 // GetNodeByID : Return a StructNode via an ID search
 func (ref *StructProject) GetNodeByID(id int) *StructNode {
 	for k := range ref.templates {
-		if k.GetId() == id {
+		if k.GetID() == id {
 			return k
 		}
 	}

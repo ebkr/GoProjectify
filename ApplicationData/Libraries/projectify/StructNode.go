@@ -26,14 +26,14 @@ func (ref *StructNode) isConnected(node *StructNode) bool {
 	return node.recursiveFind(ref)
 }
 
+// recursiveFind : Attempts to find a node object in all connections, and subsequent connections.
 func (ref *StructNode) recursiveFind(node *StructNode) bool {
 	if ref == node {
 		return true
-	} else {
-		for _, v := range ref.Connections {
-			if v.recursiveFind(node) {
-				return true
-			}
+	}
+	for _, v := range ref.Connections {
+		if v.recursiveFind(node) {
+			return true
 		}
 	}
 	return false
@@ -45,9 +45,8 @@ func (ref *StructNode) AddConnection(node *StructNode) bool {
 		arr := append(ref.Connections, node)
 		ref.Connections = arr
 		return true
-	} else {
-		return false
 	}
+	return false
 }
 
 // Print : Displays connected nodes
@@ -58,8 +57,8 @@ func (ref *StructNode) Print(i int) {
 	}
 }
 
-// GetId : Retrieve Node's ID
-func (ref *StructNode) GetId() int {
+// GetID : Retrieve Node's ID
+func (ref *StructNode) GetID() int {
 	return ref.id
 }
 
@@ -73,6 +72,7 @@ func (ref *StructNode) GetPosition() [2]float64 {
 	return [2]float64{ref.posX, ref.posY}
 }
 
+// SetPosition : Set X and Y coordinates
 func (ref *StructNode) SetPosition(x, y float64) {
 	ref.posX = x
 	ref.posY = y
