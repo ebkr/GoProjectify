@@ -242,8 +242,9 @@ func (ref *StructCreate) updateReadData() {
 }
 
 // Delete : Delete the file/directory
-func (ref *StructCreate) Delete() {
-	os.Remove(ref.Dir + ref.Name)
+func (ref *StructCreate) Delete() error {
+	err := os.Remove(ref.Dir + ref.Name)
+	return err
 }
 
 // CheckExistence : Used to check if file/directory exists.
