@@ -86,14 +86,14 @@ func Test_NodeTest(test *testing.T) {
 // Test_GenerateSimpleNodeTree : Creates a demo project, and generates a specific node tree
 func Test_GenerateSimpleNodeTree(test *testing.T) {
 	log.Println("> Running Test: GenerateSimpleNodeTree")
-	tempDir, file := generateDirectoryAndFile(test)
-	//file := projectify.StructCreate{}.New("./Test", "/MyFile.projectify")
+	tempDir, _ := generateDirectoryAndFile(test)
+	file := projectify.StructCreate{}.New("./Test", "/MyFile.projectify")
 	project := projectify.StructProject{}
 	project.Init()
 	file.NewNode(0, "Example1")
 	file.NewNode(1, "Example2")
 	log.Println(">> Updating Project Tree #1")
-	updateProjectTree(&project, file)
+	updateProjectTree(&project, &file)
 	log.Println(">> Adding binds")
 	nodeA := project.GetNodeByID(0)
 	nodeB := project.GetNodeByID(1)
@@ -108,7 +108,7 @@ func Test_GenerateSimpleNodeTree(test *testing.T) {
 		file.AppendFile("<<BINDS>>", "0:1")
 	}
 	log.Println(">> Updating Project Tree #2")
-	updateProjectTree(&project, file)
+	updateProjectTree(&project, &file)
 	log.Println(">> Getting Project Tree")
 	tree := project.GetTree()
 	var counter int
