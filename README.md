@@ -2,7 +2,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/ebkr/GoProjectify)](https://goreportcard.com/badge/github.com/ebkr/GoProjectify)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Dev Status](https://img.shields.io/travis/ebkr/GoProjectify/dev.svg)](https://travis-ci.org/ebkr/GoProjectify)
+[![Master Status](https://img.shields.io/travis/ebkr/GoProjectify/master.svg)](https://travis-ci.org/ebkr/GoProjectify)
 
 ![](https://github.com/ebkr/GoProjectify/blob/master/ApplicationData/Assets/goProjectify.png)
  
