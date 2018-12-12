@@ -18,7 +18,7 @@ func generateDirectoryAndFile(test *testing.T) (*projectify.StructCreate, *proje
 	if !tempDir.CheckExistence() {
 		test.Errorf("Could not create directory")
 	}
-	file := projectify.StructCreate{}.New("./Test/", "MyFile")
+	file := projectify.StructCreate{}.New("./Test/", "MyFile.projectify")
 	file.OverwriteFile("<<TEMPLATES>>\n<<BINDS>>\n<<POSITIONS>>\n")
 	if !file.CheckExistence() {
 		test.Errorf("File not created")
@@ -87,8 +87,8 @@ func Test_NodeTest(test *testing.T) {
 func Test_GenerateSimpleNodeTree(test *testing.T) {
 	log.Println("> Running Test: GenerateSimpleNodeTree")
 	tempDir, file := generateDirectoryAndFile(test)
+	//file := projectify.StructCreate{}.New("./Test", "/MyFile.projectify")
 	project := projectify.StructProject{}
-	file.OverwriteFile("<<TEMPLATES>>\n<<BINDS>>\n<<POSITIONS>>\n")
 	project.Init()
 	file.NewNode(0, "Example1")
 	file.NewNode(1, "Example2")
