@@ -84,7 +84,8 @@ func Test_GenerateSimpleNodeTree(test *testing.T) {
 	log.Println("> Running Test: GenerateSimpleNodeTree")
 	tempDir, file := generateDirectoryAndFile(test)
 	project := projectify.StructProject{}
-	file.NewNode(0, "Example1")
+	result := file.NewNode(0, "Example1")
+	log.Println("Result: " + strconv.FormatBool(result))
 	file.NewNode(1, "Example2")
 	log.Println(">> Updating Project Tree #1")
 	updateProjectTree(&project, file)
