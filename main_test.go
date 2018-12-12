@@ -89,6 +89,14 @@ func Test_GenerateSimpleNodeTree(test *testing.T) {
 	log.Println(">> Updating Project Tree #1")
 	updateProjectTree(&project, file)
 	log.Println(">> Adding binds")
+	nodeA := project.GetNodeByID(0)
+	nodeB := project.GetNodeByID(1)
+	if nodeA == nil {
+		test.Errorf("Node A cannot be found")
+	}
+	if nodeB == nil {
+		test.Errorf("Node B cannot be found")
+	}
 	if project.GetNodeByID(0).AddConnection(project.GetNodeByID(1)) {
 		log.Println(">> Applying Bind")
 		file.AppendFile("<<BINDS>>", "0:1")
