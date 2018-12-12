@@ -5,5 +5,7 @@ go:
 
 go_import_path: ./
 
+install: true
+
 scripts:
   - go test
