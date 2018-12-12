@@ -88,6 +88,9 @@ func Test_GenerateSimpleNodeTree(test *testing.T) {
 	file.NewNode(1, "Example2")
 	log.Println(">> Updating Project Tree #1")
 	updateProjectTree(&project, file)
+	for node, v := range project.GetTree() {
+		log.Println("Found Node: " + v + ":" + strconv.Itoa(node.GetID()))
+	}
 	log.Println(">> Adding binds")
 	nodeA := project.GetNodeByID(0)
 	nodeB := project.GetNodeByID(1)

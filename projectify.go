@@ -129,8 +129,8 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 				}
 			}
 
-			generateProjectTree(&fileProject, &proj)
 			id := proj.GetAvailableID()
+			generateProjectTree(&fileProject, &proj)
 			result := fileProject.NewNode(id, name)
 			generateProjectTree(&fileProject, &proj)
 			if !result {
