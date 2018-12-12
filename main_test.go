@@ -82,37 +82,41 @@ func Test_NodeTest(test *testing.T) {
 // Test_GetUniqueID : Attempts to retrieve the correct AvailableID
 func Test_GetUniqueID(test *testing.T) {
 	log.Println("> Running Test: GetUniqueID")
-	// Create Defaults
-	tempDir, file := generateDirectoryAndFile(test)
-	project := projectify.StructProject{}
 
-	// Initialise and update project
-	updateProjectTree(&project, file)
+	project := projectify.StructProject{}
+	project.Init()
 
 	// Add Nodes
-	file.NewNode(0, "Example1")
-	file.NewNode(1, "Example2")
-	file.RemoveNode(0)
 
-	// Update project
-	updateProjectTree(&project, file)
+	nodeA := projectify.StructNode{}.New(0, "Example1", 0, 0)
+	nodeB := projectify.StructNode{}.New(1, "Example2", 0, 0)
+
+	tree := map[*projectify.StructNode]string{
+		&nodeB: nodeB.GetValue(),
+	}
+
+	if !nodeA.AddConnection(&nodeB) {
+		test.Errorf("Could not link nodes")
+	}
+
+	project.SetTree(tree)
 
 	// Attempt to get new NodeID
 	var id int = project.GetAvailableID()
 	if id != 0 {
 		test.Errorf("Invalid ID #1. Expecting 0, got " + strconv.Itoa(id))
 	}
-	file.NewNode(project.GetAvailableID(), "Example1")
 
-	// Update Again
-	updateProjectTree(&project, file)
+	tree = map[*projectify.StructNode]string{
+		&nodeB: nodeB.GetValue(),
+		&nodeA: nodeA.GetValue(),
+	}
+
+	project.SetTree(tree)
 
 	// Get new ID
 	id = project.GetAvailableID()
 	if id != 2 {
 		test.Errorf("Invalid ID #2. Expecting 2, got " + strconv.Itoa(id))
 	}
-
-	file.Delete()
-	tempDir.Delete()
 }
