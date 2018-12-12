@@ -28,16 +28,12 @@ func generateDirectoryAndFile(test *testing.T) (*projectify.StructCreate, *proje
 
 // updateProjectTree : Updates nodes for the project
 func updateProjectTree(project *projectify.StructProject, file *projectify.StructCreate) {
-	log.Println("Updating Tree")
-	log.Println(file.GetData())
+	project.Init()
 	nodes := file.GenerateNodeTree()
-	log.Println(nodes)
 	myMap := map[*projectify.StructNode]string{}
 	for i := 0; i < len(nodes); i++ {
-		log.Println("Found Node: " + nodes[i].GetValue())
 		myMap[nodes[i]] = nodes[i].GetValue()
 	}
-	log.Println("Setting Tree")
 	project.SetTree(myMap)
 }
 
@@ -81,89 +77,6 @@ func Test_NodeTest(test *testing.T) {
 			test.Errorf("Node should not connect to parent")
 		}
 	}
-}
-
-// Test_GenerateSimpleNodeTree : Creates a demo project, and generates a specific node tree
-func Test_GenerateSimpleNodeTree(test *testing.T) {
-	log.Println("> Running Test: GenerateSimpleNodeTree")
-	tempDir, _ := generateDirectoryAndFile(test)
-	file := projectify.StructCreate{}.New("./Test", "/MyFile.projectify")
-	project := projectify.StructProject{}
-	project.Init()
-	file.NewNode(0, "Example1")
-	file.NewNode(1, "Example2")
-	log.Println(">> Updating Project Tree #1")
-	updateProjectTree(&project, &file)
-	log.Println(">> Adding binds")
-	nodeA := project.GetNodeByID(0)
-	nodeB := project.GetNodeByID(1)
-	if nodeA == nil {
-		test.Errorf("Node A cannot be found")
-	}
-	if nodeB == nil {
-		test.Errorf("Node B cannot be found")
-	}
-	if project.GetNodeByID(0).AddConnection(project.GetNodeByID(1)) {
-		log.Println(">> Applying Bind")
-		file.AppendFile("<<BINDS>>", "0:1")
-	}
-	log.Println(">> Updating Project Tree #2")
-	updateProjectTree(&project, &file)
-	log.Println(">> Getting Project Tree")
-	tree := project.GetTree()
-	var counter int
-	for node := range tree {
-		counter++
-		log.Println(">> Loop")
-		if node.GetID() == 0 {
-			for _, node := range node.Connections {
-				log.Println(node.GetValue())
-			}
-			if len(node.Connections) != 1 {
-				test.Errorf("Wrong number of connections")
-			}
-		}
-	}
-	if counter != 2 {
-		test.Errorf("Wrong number of nodes created")
-	}
-	log.Println(">> Delete")
-	file.Delete()
-	tempDir.Delete()
-}
-
-// Test_GenerateExtendedNodeTree : Creates a demo project, and generates a node tree with duplicate links
-func Test_GenerateExtendedNodeTree(test *testing.T) {
-	log.Println("> Running Test: GenerateExtendedNodeTree")
-	tempDir, file := generateDirectoryAndFile(test)
-	project := projectify.StructProject{}
-	project.Init()
-	file.AppendFile("<<TEMPLATES>>", "0:Example1")
-	file.AppendFile("<<TEMPLATES>>", "1:Example2")
-	updateProjectTree(&project, file)
-	if project.GetNodeByID(0).AddConnection(project.GetNodeByID(1)) {
-		file.AppendFile("<<BINDS>>", "0:1")
-		file.AppendFile("<<BINDS>>", "0:1")
-	}
-	updateProjectTree(&project, file)
-	tree := project.GetTree()
-	var counter int
-	for node := range tree {
-		counter++
-		if node.GetID() == 0 {
-			for _, node := range node.Connections {
-				log.Println(node.GetValue())
-			}
-			if len(node.Connections) != 1 {
-				test.Errorf("Wrong number of connections")
-			}
-		}
-	}
-	if counter != 2 {
-		test.Errorf("Wrong number of nodes created")
-	}
-	file.Delete()
-	tempDir.Delete()
 }
 
 // Test_GetUniqueID : Attempts to retrieve the correct AvailableID
