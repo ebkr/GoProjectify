@@ -29,6 +29,7 @@ func generateDirectoryAndFile(test *testing.T) (*projectify.StructCreate, *proje
 // updateProjectTree : Updates nodes for the project
 func updateProjectTree(project *projectify.StructProject, file *projectify.StructCreate) {
 	log.Println("Updating Tree")
+	log.Println(file.GetData())
 	nodes := file.GenerateNodeTree()
 	log.Println(nodes)
 	myMap := map[*projectify.StructNode]string{}

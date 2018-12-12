@@ -247,6 +247,12 @@ func (ref *StructCreate) Delete() error {
 	return err
 }
 
+// GetData : Return updated data
+func (ref *StructCreate) GetData() string {
+	ref.updateReadData()
+	return ref.data
+}
+
 // CheckExistence : Used to check if file/directory exists.
 func (ref *StructCreate) CheckExistence() bool {
 	_, err := os.Stat(ref.Dir + ref.Name)
