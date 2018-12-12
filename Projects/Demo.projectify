@@ -1,0 +1,14 @@
+# An empty GoProjectify project
+<<TEMPLATES>>
+2:Test
+1:Dummy
+0:Example
+<<BINDS>>
+1:2
+1:0
+<<POSITIONS>>
+[4]:1266:166
+[3]:611:590
+[2]:597:328
+[0]:396:330
+[1]:417:82

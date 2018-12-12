@@ -1,5 +1,8 @@
-let loadedProject = null;
-let currentNodes = [];
+var loadedProject = null;
+var currentNodes = [];
+var focusedNode = null;
+var newNodePos = [0,0];
+
 
 // Prompt new file creation
 function createProject() {
@@ -8,6 +11,7 @@ function createProject() {
         var oReq = new XMLHttpRequest();
         oReq.open("GET", "/api/NewProject/" + projName);
         oReq.send();
+        loadedProject = projName;
     }
 }
 
@@ -17,8 +21,7 @@ function addNode() {
         let nodeName = prompt("New Node Name: ");
         if (nodeName) {
             var oReq = new XMLHttpRequest();
-            console.log(loadedProject);
-            oReq.open("GET", "/api/LoadProject/NewNode/" + nodeName + "/_/" + loadedProject);
+            oReq.open("GET", "/api/LoadProject/NewNode/" + nodeName + "/" + newNodePos[0] + ":" + newNodePos[1] + "/" + loadedProject);
             oReq.addEventListener("load", function(res){
                 let tree = parseCallOutput(res.currentTarget.responseText, []);
                 currentNodes = tree;
@@ -52,7 +55,7 @@ function link(a, b) {
 // Calls link(x,y). Creates link between two clicked nodes.
 function linkNodes(obj) {
     $("#draw").attr("selected", "true");
-    let clicked_a = false;
+    let clicked_a = obj;
     let clicked_b = false;
     $("#draw").click(function(e) {
         if (!clicked_a) {
@@ -72,9 +75,8 @@ function linkNodes(obj) {
 // Removes a node from the project
 function removeNode(nodeId) {
     if (loadedProject) {
-        if (nodeId) {
+        if (nodeId !== null) {
             var oReq = new XMLHttpRequest();
-            console.log(loadedProject);
             oReq.open("GET", "/api/LoadProject/RemoveNode/" + nodeId + "/_/" + loadedProject);
             oReq.addEventListener("load", function(res){
                 let tree = parseCallOutput(res.currentTarget.responseText, []);
@@ -112,6 +114,36 @@ function updateProjects() {
             node.innerText = splits[i];
             document.getElementById("projects").appendChild(node);
             node.setAttribute("onclick", "loadProject(this.innerText);");
+
+            if ($(node).text() == loadedProject) {
+                $(node).attr("selected", true);
+            }
+
+            $(node).contextmenu(function() {
+                $("#contextModal").attr("attr-active", true);
+                $("#contextTitle").text("Manage Project: " + $(node).text())
+                $("#contextOptions").html(null);
+
+                let load = document.createElement("button");
+                $(load).text("Load Project");
+                $(load).click(function() {
+                    loadProject($(node).text());
+                });
+
+                let del = document.createElement("button");
+                $(del).text("Delete Project");
+                $(del).click(function() {
+                    var oReq = new XMLHttpRequest();
+                    oReq.open("GET", "/api/LoadProject/DeleteProject/_/_/" + $(node).text());
+                    oReq.send();
+                    $(node).attr("selected", true);
+                });
+
+                $("#contextOptions").append(load);
+                $("#contextOptions").append(del);
+
+                return false;
+            });
         }
     });
     oReq.open("GET", "/api/GetProjects");
@@ -120,7 +152,6 @@ function updateProjects() {
 
 // Turn <<GENERATE>> in to nodes.
 function parseCallOutput(str, nodeTree) {
-    console.log(str);
     found = false;
     let splits = str.split("\n");
     let node;
@@ -173,8 +204,41 @@ function drawNodes() {
                 drawNodes();
             }
         });
-        $(node).dblclick(function() {
-            removeNode(currentNodes[i].id);
+        $(node).contextmenu(function(e) {
+            e.stopPropagation();
+            if (focusedNode) {
+                $(focusedNode).attr("selected", null);
+            }
+            focusedNode = node;
+            $(focusedNode).attr("selected", true);
+            $("#contextModal").attr("attr-active", true);
+
+            $("#contextTitle").text("Modifying Node: " + $(node).text());
+
+            let link = document.createElement("button");
+            $(link).text("Link");
+            $(link).click(function() {
+                linkNodes(focusedNode);
+            });
+
+            let rename = document.createElement("button");
+            $(rename).text("Rename");
+            $(rename).click(function() {
+                $(rename).text("To Implement");
+            });
+
+            let del = document.createElement("button");
+            $(del).text("Delete");
+            $(del).click(function() {
+                removeNode(currentNodes[i].id);
+            });
+
+            $("#contextOptions").html(null);
+            $("#contextOptions").append(rename);
+            $("#contextOptions").append(link);
+            $("#contextOptions").append(del);
+            // Prevent browser context menu
+            return false;
         });
         currentNodes[i].connections = currentNodes[i].connections || [];
         currentNodes[i].positions = currentNodes[i].positions || [0, 0];
@@ -187,7 +251,6 @@ function drawNodes() {
         let start = $(connections[i][0]).position();
         let startWidth = $(connections[i][0]).width();
         let startHeight = $(connections[i][0]).height();
-        console.log(connections[i]);
         for (let j=0; j<connections[i][1].length; j++) {
             let end = $("div[attr-nodeId=" + connections[i][1][j] + "]").position();
             let endWidth = $("div[attr-nodeId=" + connections[i][1][j] + "]").width();
@@ -199,4 +262,27 @@ function drawNodes() {
 
 }
 
+// Constantly update list of projects
 setInterval(updateProjects, 1000);
+
+// Enable context escape
+$("#contextModal").click(function() {
+    $("#contextModal").attr("attr-active", null);
+})
+
+$("#draw").contextmenu(function(e) {
+    e.stopPropagation();
+    newNodePos[0] = e.pageX;
+    newNodePos[1] = e.pageY;
+    $("#contextModal").attr("attr-active", true);
+    $("#contextTitle").text("What would you like to do?");
+    $("#contextOptions").html(null);
+
+    let newNode = document.createElement("button");
+    $(newNode).text("Create a new node");
+    $(newNode).click(function() {
+        addNode();
+    });
+    $("#contextOptions").append(newNode);
+    return false;
+});

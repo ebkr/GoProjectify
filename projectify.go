@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -13,15 +15,6 @@ import (
 // Globals
 var loadedProject projectify.StructProject
 var configData projectify.StructConf
-
-// buildString : Build a string from an array, starting at index
-func buildString(array []string, index int) string {
-	var str = "/"
-	for i := index; i < len(array); i++ {
-		str += array[i] + "/"
-	}
-	return str[:len(str)-1]
-}
 
 // buildApplicationReguirements : Create Project directory, and default configurations
 func buildApplicationRequirements(workingDir string) {
@@ -55,6 +48,7 @@ func buildApplicationRequirements(workingDir string) {
 
 // main : Main Method, loads web server
 func main() {
+	fmt.Println("> Preparing")
 	workingDir, dirErr := os.Getwd()
 	if dirErr != nil {
 		panic("Can't get the working directory")
@@ -76,13 +70,17 @@ func main() {
 				}
 			}
 		} else if split[2] == "NewProject" {
-			str := buildString(split, 3)
+			str := split[3]
 			create := projectify.StructCreate{}.New(configData.GetKey("ProjectDirectory")+"\\", str+".projectify")
-			create.OverwriteFile("# An empty GoProjectify project\n<<TEMPLATES>>\n<<BINDS>>\n<<POSITIONS>>")
+			if !create.CheckExistence() {
+				create.OverwriteFile("# An empty GoProjectify project\n<<TEMPLATES>>\n<<BINDS>>\n<<POSITIONS>>")
+			}
 		} else if split[2] == "LoadProject" {
-			loadCase(buildString(split, 6), split[3], split, &w, r)
+			log.Println(split[3] + " on project: " + split[6])
+			loadCase(split[6], split[3], split, &w, r)
 		}
 	})
+	fmt.Println("> Starting Server on Port: " + configData.GetKey("Port"))
 	http.ListenAndServe(configData.GetKey("URL")+":"+configData.GetKey("Port"), nil)
 }
 
@@ -113,13 +111,35 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 	writer.Write([]byte("<<OUTPUT>>\n"))
 
 	funcs := map[string]func(){
-		"None": func() {},
+		"None": func() {
+		},
 		"NewNode": func() {
 			name := split[4]
+			pos := split[5]
+			var x, y int
+
+			nums := strings.Split(pos, ":")
+			if len(nums) > 1 {
+				var err, err2 error
+				x, err = strconv.Atoi(nums[0])
+				y, err2 = strconv.Atoi(nums[1])
+				if err != nil || err2 != nil {
+					x = 0
+					y = 0
+				}
+			}
+
+			id := proj.GetAvailableID()
 			generateProjectTree(&fileProject, &proj)
-			result := fileProject.NewNode(proj.GetAvailableID(), name)
+			result := fileProject.NewNode(id, name)
+			generateProjectTree(&fileProject, &proj)
 			if !result {
 				writer.Write([]byte("WARN:Illegal Character"))
+			} else {
+				node := proj.GetNodeByID(id)
+				if node != nil {
+					fileProject.SetPosition(id, x, y)
+				}
 			}
 		},
 		// Remove node
@@ -128,9 +148,12 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 			id, err := strconv.Atoi(split[4])
 			if err == nil {
 				node := proj.GetNodeByID(id)
+				fmt.Println("Removing node: " + strconv.Itoa(node.GetID()))
 				if node != nil {
 					fileProject.RemoveNode(node.GetID())
 				}
+			} else {
+				fmt.Println(err.Error())
 			}
 		},
 		"RemoveLink": func() {
@@ -181,6 +204,10 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 				}
 			}
 		},
+		"DeleteProject": func() {
+			fileProject.Delete()
+			fileProject = projectify.StructCreate{}
+		},
 	}
 	// Display options, and handle selection
 	funcs[use]()
@@ -194,13 +221,5 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 		x := int(k.GetPosition()[0])
 		y := int(k.GetPosition()[1])
 		writer.Write([]byte("Position:" + strconv.Itoa(x) + ":" + strconv.Itoa(y) + "\n"))
-	}
-}
-
-// deleteCase : Delete a project
-func deleteCase(load string) {
-	fileProject := projectify.StructCreate{}.New(configData.GetKey("ProjectDirectory")+"\\", load+".projectify")
-	if fileProject.CheckExistence() {
-		fileProject.Delete()
 	}
 }

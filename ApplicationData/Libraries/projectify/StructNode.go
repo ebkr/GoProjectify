@@ -23,6 +23,11 @@ func (ref StructNode) New(id int, value string, x, y float64) StructNode {
 
 // isConnected : Compares connected nodes, to prevent recursive connections
 func (ref *StructNode) isConnected(node *StructNode) bool {
+	for _, con := range ref.Connections {
+		if con == node {
+			return true
+		}
+	}
 	return node.recursiveFind(ref)
 }
 
