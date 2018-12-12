@@ -86,15 +86,20 @@ func Test_GenerateSimpleNodeTree(test *testing.T) {
 	project := projectify.StructProject{}
 	file.NewNode(0, "Example1")
 	file.NewNode(1, "Example2")
+	log.Println(">> Updating Project Tree #1")
 	updateProjectTree(&project, file)
+	log.Println(">> Adding binds")
 	if project.GetNodeByID(0).AddConnection(project.GetNodeByID(1)) {
 		file.AppendFile("<<BINDS>>", "0:1")
 	}
+	log.Println(">> Updating Project Tree #2")
 	updateProjectTree(&project, file)
+	log.Println(">> Getting Project Tree")
 	tree := project.GetTree()
 	var counter int
 	for node := range tree {
 		counter++
+		log.Println(">> Loop")
 		if node.GetID() == 0 {
 			for _, node := range node.Connections {
 				log.Println(node.GetValue())
@@ -107,6 +112,7 @@ func Test_GenerateSimpleNodeTree(test *testing.T) {
 	if counter != 2 {
 		test.Errorf("Wrong number of nodes created")
 	}
+	log.Println(">> Delete")
 	file.Delete()
 	tempDir.Delete()
 }
