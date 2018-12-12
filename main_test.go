@@ -30,6 +30,7 @@ func generateDirectoryAndFile(test *testing.T) (*projectify.StructCreate, *proje
 func updateProjectTree(project *projectify.StructProject, file *projectify.StructCreate) {
 	log.Println("Updating Tree")
 	nodes := file.GenerateNodeTree()
+	log.Println(nodes)
 	myMap := map[*projectify.StructNode]string{}
 	for i := 0; i < len(nodes); i++ {
 		log.Println("Found Node: " + nodes[i].GetValue())
