@@ -28,7 +28,6 @@ func generateDirectoryAndFile(test *testing.T) (*projectify.StructCreate, *proje
 
 // updateProjectTree : Updates nodes for the project
 func updateProjectTree(project *projectify.StructProject, file *projectify.StructCreate) {
-	project.Init()
 	nodes := file.GenerateNodeTree()
 	myMap := map[*projectify.StructNode]string{}
 	for i := 0; i < len(nodes); i++ {
@@ -84,8 +83,8 @@ func Test_GenerateSimpleNodeTree(test *testing.T) {
 	log.Println("> Running Test: GenerateSimpleNodeTree")
 	tempDir, file := generateDirectoryAndFile(test)
 	project := projectify.StructProject{}
-	result := file.NewNode(0, "Example1")
-	log.Println("Result: " + strconv.FormatBool(result))
+	project.Init()
+	file.NewNode(0, "Example1")
 	file.NewNode(1, "Example2")
 	log.Println(">> Updating Project Tree #1")
 	updateProjectTree(&project, file)
@@ -132,6 +131,7 @@ func Test_GenerateExtendedNodeTree(test *testing.T) {
 	log.Println("> Running Test: GenerateExtendedNodeTree")
 	tempDir, file := generateDirectoryAndFile(test)
 	project := projectify.StructProject{}
+	project.Init()
 	file.NewNode(0, "Example1")
 	file.NewNode(1, "Example2")
 	updateProjectTree(&project, file)
