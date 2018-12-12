@@ -90,6 +90,7 @@ func Test_GenerateSimpleNodeTree(test *testing.T) {
 	updateProjectTree(&project, file)
 	log.Println(">> Adding binds")
 	if project.GetNodeByID(0).AddConnection(project.GetNodeByID(1)) {
+		log.Println(">> Applying Bind")
 		file.AppendFile("<<BINDS>>", "0:1")
 	}
 	log.Println(">> Updating Project Tree #2")
