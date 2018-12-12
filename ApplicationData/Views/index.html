@@ -17,13 +17,24 @@
             <br/>
         </nav>
         <div id="Content">
-            <div id="subNav">
-                <button onclick="addNode();">New Node</button>
-                <button onclick="linkNodes(this);">Link Nodes</button>
-            </div>
             <div id="draw">
 
             </div>
+        </div>
+        <div id="contextModal">
+            <table>
+                <tr>
+                    <td>
+                        <div id="contextBackground">
+                            <h3 id="contextTitle">Modify Node: Root</h3>
+                            <div id="contextOptions">
+                                <button>Link</button>
+                                <button>Delete</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </div>
         <script src="Code/JS/Calls.js"></script>
         <script>
