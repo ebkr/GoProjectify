@@ -3,8 +3,6 @@ language: go
 go:
   - "1.10.x"
 
-go_import_path: ./
-
 install: true
 
 scripts:
