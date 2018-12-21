@@ -180,6 +180,8 @@ function parseCallOutput(str, nodeTree) {
 function drawNodes() {
     let connections = [];
     document.getElementById("draw").innerHTML = null;
+    let canvas = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    $("#draw").append(canvas);
     for (let i=0; i<currentNodes.length; i++) {
         let node = document.createElement("div");
         node.innerText = currentNodes[i].value;
@@ -187,24 +189,24 @@ function drawNodes() {
         node.setAttribute("draggable", "true");
         node.className = "node";
         document.getElementById("draw").append(node);
-        $(node).draggable({ 
+        $(node).draggable({
             scroll: false,
             containment: "#draw",
-            drag: function(){
+            drag: function () {
                 var thisPos = $(node).position();
                 var x = thisPos.left;
                 var y = thisPos.top;
                 currentNodes[i].positions[0] = x;
                 currentNodes[i].positions[1] = y;
             },
-            stop: function() {
+            stop: function () {
                 var oReq = new XMLHttpRequest();
                 oReq.open("GET", "/api/LoadProject/Reposition/" + currentNodes[i].id + "/" + currentNodes[i].positions[0] + ":" + currentNodes[i].positions[1] + "/" + loadedProject);
                 oReq.send();
                 drawNodes();
             }
         });
-        $(node).contextmenu(function(e) {
+        $(node).contextmenu(function (e) {
             e.stopPropagation();
             if (focusedNode) {
                 $(focusedNode).attr("selected", null);
@@ -217,19 +219,19 @@ function drawNodes() {
 
             let link = document.createElement("button");
             $(link).text("Link");
-            $(link).click(function() {
+            $(link).click(function () {
                 linkNodes(focusedNode);
             });
 
             let rename = document.createElement("button");
             $(rename).text("Rename");
-            $(rename).click(function() {
+            $(rename).click(function () {
                 $(rename).text("To Implement");
             });
 
             let del = document.createElement("button");
             $(del).text("Delete");
-            $(del).click(function() {
+            $(del).click(function () {
                 removeNode(currentNodes[i].id);
             });
 
@@ -248,14 +250,13 @@ function drawNodes() {
     }
     let ch = document.getElementById("draw").children;
     for (let i=0; i<connections.length; i++) {
-        let start = $(connections[i][0]).position();
-        let startWidth = $(connections[i][0]).width();
-        let startHeight = $(connections[i][0]).height();
         for (let j=0; j<connections[i][1].length; j++) {
-            let end = $("div[attr-nodeId=" + connections[i][1][j] + "]").position();
-            let endWidth = $("div[attr-nodeId=" + connections[i][1][j] + "]").width();
-            let endHeight = $("div[attr-nodeId=" + connections[i][1][j] + "]").height();
-            $("#draw").line(start.left + (startWidth/2), start.top + (startHeight/2), end.left + (endWidth/2), end.top + (endHeight/2));
+            for (let num=0; num<connections[i][1].length; num++) {
+                $(connections[i][0]).drawArrow($("div[attr-nodeId=" + connections[i][1][num] + "]"), {
+                    parent: canvas,
+                    color: "#bababa"
+                });
+            }
         }
     }
     $(".line").css("z-index", "90");

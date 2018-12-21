@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"./ApplicationData/Libraries/projectify"
+	"github.com/ebkr/GoProjectify/ApplicationData/Libraries/projectify"
 )
 
 // Test_CreateAndRemoveDirectory : Creates a directory, and attempts to remove it
