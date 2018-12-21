@@ -1,4 +1,3 @@
-.vs
-./.vs
-.idea
-./idea/*
+.vs/
+.idea/
+*.exe
