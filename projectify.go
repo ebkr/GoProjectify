@@ -19,7 +19,7 @@ var configData projectify.StructConf
 // buildApplicationReguirements : Create Project directory, and default configurations
 func buildApplicationRequirements(workingDir string) {
 	configs := map[string][]string{
-		"Server.ini": []string{"URL:localhost", "Port:8080", "ProjectDirectory:" + workingDir + "\\Projects"},
+		"Server.ini": {"URL:localhost", "Port:8080", "ProjectDirectory:" + workingDir + "\\Projects"},
 	}
 	// Create Config directory
 	configFolder := projectify.StructCreate{}.New(workingDir+"/Config", "")
@@ -170,13 +170,12 @@ func (load *LoadCase) newNode(split []string) error {
 	load.GenerateProjectTree()
 	if !result {
 		return errors.New("error: Name Contains Illegal Character")
+	}
+	node := load.Proj.GetNodeByID(id)
+	if node != nil {
+		load.FileProject.SetPosition(id, x, y)
 	} else {
-		node := load.Proj.GetNodeByID(id)
-		if node != nil {
-			load.FileProject.SetPosition(id, x, y)
-		} else {
-			return errors.New("error: Could not find node. Ensure write permissions are enabled")
-		}
+		return errors.New("error: Could not find node. Ensure write permissions are enabled")
 	}
 	return nil
 }
@@ -254,7 +253,7 @@ func (load *LoadCase) deleteProject(split []string) error {
 	return err
 }
 
-// generateProjectTree : Generates a node tree for use with the project
+// GenerateProjectTree : Generates a node tree for use with the project
 func (load *LoadCase) GenerateProjectTree() {
 	load.Proj.Init()
 	nodes := load.FileProject.GenerateNodeTree()

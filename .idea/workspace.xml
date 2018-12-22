@@ -2,10 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2dbcf786-d9bf-4c5f-9306-f87eec5bd9e9" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ApplicationData/Libraries/projectify/StructCreate.go" beforeDir="false" afterPath="$PROJECT_DIR$/ApplicationData/Libraries/projectify/StructCreate.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ApplicationData/Views/Code/JS/Calls.js" beforeDir="false" afterPath="$PROJECT_DIR$/ApplicationData/Views/Code/JS/Calls.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/main_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/projectify.go" beforeDir="false" afterPath="$PROJECT_DIR$/projectify.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -16,11 +12,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/projectify.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="178">
-              <caret line="161" column="17" lean-forward="true" selection-start-line="161" selection-start-column="17" selection-end-line="161" selection-end-column="17" />
+            <state relative-caret-position="603">
+              <caret line="255" column="36" lean-forward="true" selection-start-line="255" selection-start-column="36" selection-end-line="255" selection-end-column="36" />
               <folding>
                 <element signature="e#14#165#0" expanded="true" />
               </folding>
@@ -82,10 +78,10 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ApplicationData/Views/Code/JS/Calls.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="671">
+            <state relative-caret-position="-1216">
               <caret line="175" column="33" selection-start-line="175" selection-start-column="33" selection-end-line="175" selection-end-column="33" />
             </state>
           </provider>
@@ -122,8 +118,8 @@
         <option value="$PROJECT_DIR$/.travis.yml" />
         <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/loadCases.go" />
-        <option value="$PROJECT_DIR$/projectify.go" />
         <option value="$PROJECT_DIR$/ApplicationData/Views/Code/JS/Calls.js" />
+        <option value="$PROJECT_DIR$/projectify.go" />
       </list>
     </option>
   </component>
@@ -277,16 +273,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/projectify.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="178">
-          <caret line="161" column="17" lean-forward="true" selection-start-line="161" selection-start-column="17" selection-end-line="161" selection-end-column="17" />
-          <folding>
-            <element signature="e#14#165#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ApplicationData/Views/index.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="119">
@@ -296,8 +282,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ApplicationData/Views/Code/JS/Calls.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="671">
+        <state relative-caret-position="-1216">
           <caret line="175" column="33" selection-start-line="175" selection-start-column="33" selection-end-line="175" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/projectify.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="603">
+          <caret line="255" column="36" lean-forward="true" selection-start-line="255" selection-start-column="36" selection-end-line="255" selection-end-column="36" />
+          <folding>
+            <element signature="e#14#165#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
