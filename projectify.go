@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"./ApplicationData/Libraries/projectify"
+	"github.com/ebkr/GoProjectify/ApplicationData/Libraries/projectify"
 )
 
 // Globals

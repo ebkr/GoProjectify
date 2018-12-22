@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	"./ApplicationData/Libraries/projectify"
+	"github.com/ebkr/GoProjectify/ApplicationData/Libraries/projectify"
 )
 
 // generateDirectoryAndFile : Create a temporary directory, and a file inside it.
