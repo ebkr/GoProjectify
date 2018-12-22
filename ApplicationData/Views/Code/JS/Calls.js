@@ -171,6 +171,10 @@ function parseCallOutput(str, nodeTree) {
             } else if (lineSplit[0] == "Position") {
                 node.positions = [Number(lineSplit[1]), Number(lineSplit[2])];
             }
+        } else {
+            if (splits[i].search("error:")) {
+                alert(splits[i]);
+            }
         }
     }
     return nodeTree;
