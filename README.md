@@ -7,7 +7,7 @@
 ![](https://github.com/ebkr/GoProjectify/blob/master/ApplicationData/Assets/goProjectify.png)
  
 ## What is it?
-GoProjectify is a Poftware Management Software, aiming to provide an easy way to list tasks and dependencies.
+GoProjectify is a Project Management Software, aiming to provide an easy way to show dependency trees.
 
 It can be used to break tasks down, or to create a chain of tasks to perform.
 
