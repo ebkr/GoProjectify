@@ -172,8 +172,12 @@ function parseCallOutput(str, nodeTree) {
                 node.positions = [Number(lineSplit[1]), Number(lineSplit[2])];
             }
         } else {
-            if (splits[i].search("error:")) {
-                alert(splits[i]);
+            if (splits[i].search("error:") > 0) {
+                // length(error:) = 6
+                if (splits[i].trim().length > 6) {
+                    console.log(splits[i]);
+                    alert(splits[i]);
+                }
             }
         }
     }
@@ -252,17 +256,23 @@ function drawNodes() {
         node.style.top = currentNodes[i].positions[1] + "px";
         connections.push([node, currentNodes[i].connections]);
     }
+    jsPlumb.Defaults.Endpoints = ["Blank"];
     let ch = document.getElementById("draw").children;
+    $("svg").remove();
     for (let i=0; i<connections.length; i++) {
         for (let j=0; j<connections[i][1].length; j++) {
             for (let num=0; num<connections[i][1].length; num++) {
-                $(connections[i][0]).drawArrow($("div[attr-nodeId=" + connections[i][1][num] + "]"), {
-                    parent: canvas,
-                    color: "#bababa"
+                jsPlumb.connect({
+                    source:$(connections[i][0]),
+                    target:$("div[attr-nodeId=" + connections[i][1][num] + "]"),
+                    anchors:["AutoDefault"],
+                    connector:["Straight"],
+                    overlays: ["PlainArrow"]
                 });
             }
         }
     }
+    $(".jtk-endpoint").remove();
     $(".line").css("z-index", "90");
 
 }
