@@ -13,6 +13,8 @@ It can be used to break tasks down, or to create a chain of tasks to perform.
 
 ### Status
 
+GoProjectify now works across multiple connections, meaning collaboration is now possible!
+
 Functional! The only feature not yet implemented is the ability to rename nodes, however you can still delete a node, and create a new one to replace it.
 
 The interface has been reworked a few times, and the quality of GoProjectify has improved.

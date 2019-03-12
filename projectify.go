@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -9,12 +10,14 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/ebkr/GoProjectify/ApplicationData/Libraries/projectify"
 )
 
 // Globals
 var configData projectify.StructConf
+var mail sync.Mutex
 
 // buildApplicationReguirements : Create Project directory, and default configurations
 func buildApplicationRequirements(workingDir string) {
@@ -38,9 +41,11 @@ func buildApplicationRequirements(workingDir string) {
 		}
 	}
 	// Assign global to new config
+	mail.Lock()
 	configData = projectify.StructConf{}.New(workingDir + "/Config/Server.ini")
 	// Create Project directory
 	projectFolder := projectify.StructCreate{}.New(configData.GetKey("ProjectDirectory"), "")
+	mail.Unlock()
 	if !projectFolder.CheckExistence() {
 		os.Mkdir(configData.GetKey("ProjectDirectory"), os.FileMode(0755))
 	}
@@ -56,6 +61,7 @@ func main() {
 	buildApplicationRequirements(workingDir)
 	http.Handle("/", http.FileServer(http.Dir(workingDir+"\\ApplicationData\\Views")))
 	http.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
+		mail.Lock()
 		split := strings.Split(r.URL.Path, "/")
 		if split[2] == "GetProjects" {
 			files, err := filepath.Glob(configData.GetKey("ProjectDirectory") + "\\*.projectify")
@@ -79,6 +85,7 @@ func main() {
 			log.Println(split[3] + " on project: " + split[6])
 			loadCase(split[6], split[3], split, &w, r)
 		}
+		mail.Unlock()
 	})
 	fmt.Println("> Starting Server on Port: " + configData.GetKey("Port"))
 	http.ListenAndServe(configData.GetKey("URL")+":"+configData.GetKey("Port"), nil)
@@ -105,14 +112,21 @@ func loadCase(load string, use string, split []string, w *http.ResponseWriter, r
 		log.Println(err.Error())
 	}
 	writer.Write([]byte("<<GENERATE>>\n"))
+	area := map[int]map[string]interface{}{}
 	for k := range loader.Proj.GetTree() {
-		writer.Write([]byte("Node:" + strconv.Itoa(k.GetID()) + ":" + k.GetValue() + "\n"))
+		array := map[string]interface{}{}
+		array["value"] = k.GetValue()
+		array["position"] = k.GetPosition()
+		cons := []int{}
 		for i := 0; i < len(k.Connections); i++ {
-			writer.Write([]byte("Connection:" + strconv.Itoa(k.Connections[i].GetID()) + "\n"))
+			cons = append(cons, k.Connections[i].GetID())
 		}
-		x := int(k.GetPosition()[0])
-		y := int(k.GetPosition()[1])
-		writer.Write([]byte("Position:" + strconv.Itoa(x) + ":" + strconv.Itoa(y) + "\n"))
+		array["connections"] = cons
+		area[k.GetID()] = array
+	}
+	parsed, err := json.MarshalIndent(area, "", "\t")
+	if err == nil {
+		writer.Write([]byte(parsed))
 	}
 }
 
@@ -185,8 +199,8 @@ func (load *LoadCase) removeNode(split []string) error {
 	id, err := strconv.Atoi(split[4])
 	if err == nil {
 		node := load.Proj.GetNodeByID(id)
-		fmt.Println("Removing node: " + strconv.Itoa(node.GetID()))
 		if node != nil {
+			fmt.Println("Removing node: " + strconv.Itoa(node.GetID()))
 			load.FileProject.RemoveNode(node.GetID())
 		} else {
 			return errors.New("error: Invalid Node ID")

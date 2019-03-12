@@ -1,7 +1,11 @@
-var loadedProject = null;
-var currentNodes = [];
-var focusedNode = null;
-var newNodePos = [0,0];
+let loadedProject = null;
+let currentNodes = [];
+let oldNodes = [];
+let drawnNodes = [];
+let focusedNode = null;
+let newNodePos = [0,0];
+let isDragging = false;
+
 
 
 // Prompt new file creation
@@ -155,126 +159,152 @@ function parseCallOutput(str, nodeTree) {
     found = false;
     let splits = str.split("\n");
     let node;
+    let builder = "";
     for (let i=0; i<splits.length; i++) {
         if (splits[i] == "<<GENERATE>>") {
             found = true;
         } else if (found) {
-            let lineSplit = splits[i].split(":");
-            if (lineSplit[0] == "Node") {
-                node = {};
-                node.id = Number(lineSplit[1]);
-                node.value = lineSplit[2];
-                nodeTree.push(node);
-            } else if (lineSplit[0] == "Connection") {
-                node.connections = node.connections || [];
-                node.connections.push(lineSplit[1]);
-            } else if (lineSplit[0] == "Position") {
-                node.positions = [Number(lineSplit[1]), Number(lineSplit[2])];
-            }
-        } else {
-            if (splits[i].search("error:") > 0) {
-                // length(error:) = 6
-                if (splits[i].trim().length > 6) {
-                    console.log(splits[i]);
-                    alert(splits[i]);
-                }
-            }
+            builder += splits[i];
         }
     }
-    return nodeTree;
+    return JSON.parse(builder);
+}
+
+function defineNodeInteraction(id, node, nodeArray) {
+    $(node).draggable({
+        scroll: false,
+        containment: "#draw",
+        drag: function () {
+            isDragging = true;
+            let thisPos = $(node).position();
+            let x = thisPos.left;
+            let y = thisPos.top;
+            nodeArray.position[0] = x;
+            nodeArray.position[1] = y;
+        },
+        stop: function () {
+            isDragging = false;
+            var oReq = new XMLHttpRequest();
+            oReq.open("GET", "/api/LoadProject/Reposition/" + id + "/" + nodeArray.position[0] + ":" + nodeArray.position[1] + "/" + loadedProject);
+            oReq.send();
+            drawNodes();
+            jsPlumb.repaintEverything();
+        }
+    });
+    $(node).contextmenu(function (e) {
+        e.stopPropagation();
+        if (focusedNode) {
+            $(focusedNode).attr("selected", null);
+        }
+        focusedNode = node;
+        $(focusedNode).attr("selected", true);
+        $("#contextModal").attr("attr-active", true);
+
+        $("#contextTitle").text("Modifying Node: " + $(node).text());
+
+        let link = document.createElement("button");
+        $(link).text("Link");
+        $(link).click(function () {
+            linkNodes(focusedNode);
+        });
+
+        let rename = document.createElement("button");
+        $(rename).text("Rename");
+        $(rename).click(function () {
+            $(rename).text("To Implement");
+        });
+
+        let del = document.createElement("button");
+        $(del).text("Delete");
+        $(del).click(function () {
+            removeNode(id);
+        });
+
+        $("#contextOptions").html(null);
+        $("#contextOptions").append(rename);
+        $("#contextOptions").append(link);
+        $("#contextOptions").append(del);
+        // Prevent browser context menu
+        return false;
+    });
+}
+
+function updateNode(id, nodeArray) {
+    let node = null;
+    drawnNodes.forEach(element => {
+        if (element.getAttribute("attr-nodeId") == id) {
+            node = element;
+        }
+    });
+    if (node === null) {
+        node = document.createElement("div");
+        node.className = "node";
+        node.setAttribute("attr-nodeId", id);
+        node.setAttribute("draggable", "true");
+        $("#draw").append(node);
+    }
+    node.innerText = nodeArray["value"].toString();
+    node.style.left = nodeArray.position[0] + "px";
+    node.style.top = nodeArray.position[1] + "px";
+    return node;
 }
 
 // Draws generated nodes under {let currentNodes OF TYPE []}
 function drawNodes() {
-    let connections = [];
-    document.getElementById("draw").innerHTML = null;
-    let canvas = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    $("#draw").append(canvas);
-    for (let i=0; i<currentNodes.length; i++) {
-        let node = document.createElement("div");
-        node.innerText = currentNodes[i].value;
-        node.setAttribute("attr-nodeId", currentNodes[i].id);
-        node.setAttribute("draggable", "true");
-        node.className = "node";
-        document.getElementById("draw").append(node);
-        $(node).draggable({
-            scroll: false,
-            containment: "#draw",
-            drag: function () {
-                var thisPos = $(node).position();
-                var x = thisPos.left;
-                var y = thisPos.top;
-                currentNodes[i].positions[0] = x;
-                currentNodes[i].positions[1] = y;
-            },
-            stop: function () {
-                var oReq = new XMLHttpRequest();
-                oReq.open("GET", "/api/LoadProject/Reposition/" + currentNodes[i].id + "/" + currentNodes[i].positions[0] + ":" + currentNodes[i].positions[1] + "/" + loadedProject);
-                oReq.send();
-                drawNodes();
+    let stringOfNew = currentNodes.toString();
+    let stringOfOld = oldNodes.toString();
+    // Check if nodes are different.
+    if (stringOfOld !== stringOfNew) {
+
+        idTracker = [];
+
+        Object.keys(currentNodes).forEach(function(id) {
+            idTracker.push(id);
+            let result = updateNode(id, currentNodes[id]);
+            drawnNodes = drawnNodes.filter(function(value, index, arr) {
+                return value.getAttribute("attr-nodeId") !== id;
+            });
+            drawnNodes.push(result);
+            defineNodeInteraction(id, result, currentNodes[id]);
+        });
+
+        drawnNodes.forEach(function(node, index, arr) {
+            let found = false;
+            idTracker.forEach(function(id) {
+                if (node.getAttribute("attr-nodeId") == id) {
+                    found = true;
+                }
+            });
+            if (!found) {
+                console.log("Missing node: " + node.innerHTML);
+                arr.splice(index, 1);
+                $(node).remove();
             }
         });
-        $(node).contextmenu(function (e) {
-            e.stopPropagation();
-            if (focusedNode) {
-                $(focusedNode).attr("selected", null);
-            }
-            focusedNode = node;
-            $(focusedNode).attr("selected", true);
-            $("#contextModal").attr("attr-active", true);
 
-            $("#contextTitle").text("Modifying Node: " + $(node).text());
-
-            let link = document.createElement("button");
-            $(link).text("Link");
-            $(link).click(function () {
-                linkNodes(focusedNode);
-            });
-
-            let rename = document.createElement("button");
-            $(rename).text("Rename");
-            $(rename).click(function () {
-                $(rename).text("To Implement");
-            });
-
-            let del = document.createElement("button");
-            $(del).text("Delete");
-            $(del).click(function () {
-                removeNode(currentNodes[i].id);
-            });
-
-            $("#contextOptions").html(null);
-            $("#contextOptions").append(rename);
-            $("#contextOptions").append(link);
-            $("#contextOptions").append(del);
-            // Prevent browser context menu
-            return false;
-        });
-        currentNodes[i].connections = currentNodes[i].connections || [];
-        currentNodes[i].positions = currentNodes[i].positions || [0, 0];
-        node.style.left = currentNodes[i].positions[0] + "px";
-        node.style.top = currentNodes[i].positions[1] + "px";
-        connections.push([node, currentNodes[i].connections]);
-    }
-    jsPlumb.Defaults.Endpoints = ["Blank"];
-    let ch = document.getElementById("draw").children;
-    $("svg").remove();
-    for (let i=0; i<connections.length; i++) {
-        for (let j=0; j<connections[i][1].length; j++) {
-            for (let num=0; num<connections[i][1].length; num++) {
+        jsPlumb.repaintEverything();
+        
+        jsPlumb.deleteEveryEndpoint();
+    
+        Object.keys(currentNodes).forEach(function(id) {
+            jsPlumb.Defaults.Endpoints = ["Blank"];
+            currentNodes[id].connections.forEach(con => {
                 jsPlumb.connect({
-                    source:$(connections[i][0]),
-                    target:$("div[attr-nodeId=" + connections[i][1][num] + "]"),
+                    source:$("div[attr-nodeId=" + id + "]"),
+                    target:$("div[attr-nodeId=" + con + "]"),
                     anchors:["AutoDefault"],
                     connector:["Straight"],
                     overlays: ["PlainArrow"]
                 });
-            }
-        }
+            });    
+        });
+        
     }
+
     $(".jtk-endpoint").remove();
     $(".line").css("z-index", "90");
-
+    // Do stuff
+    currentNodes = oldNodes;
 }
 
 // Constantly update list of projects
@@ -301,3 +331,15 @@ $("#draw").contextmenu(function(e) {
     $("#contextOptions").append(newNode);
     return false;
 });
+
+setInterval(function() {
+    if (!isDragging && loadedProject !== null) {
+        loadProject(loadedProject);
+    }
+}, 500);
+
+setInterval(function() {
+    if (isDragging) {
+        jsPlumb.repaintEverything();
+    }
+}, 100);
